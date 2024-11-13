@@ -1,50 +1,27 @@
 ---
-interface Props {
-	title: string;
-}
-
-const { title } = Astro.props;
+import '@fontsource-variable/lora';
+import BaseHead from '../components/BaseHead.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import Header from '../components/Header.astro';
+import ThemeIcon from '../components/ThemeIcon.astro';
 ---
 
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="description" content="Astro description" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
-		<title>{title}</title>
-	</head>
-	<body>
-		<slot />
+  <head>
+    <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+  </head>
+	<body 
+	style={{ backgroundImage: "url('/bg.jpg')" }}
+	class="min-h-screen bg-cover bg-fixed bg-center bg-no-repeat text-zinc-800 dark:text-zinc-200">
+		<div class="flex min-h-screen flex-col items-center justify-start overflow-x-hidden bg-gradient-to-br from-zinc-50 via-zinc-200/90 to-zinc-800/40 dark:from-zinc-950 dark:via-zinc-900/95 dark:to-zinc-900/60">
+			<Header />
+			<main class="container mx-auto flex flex-1 flex-col items-center justify-start p-4 font-body lg:p-8">
+				<slot />
+			</main>
+			<footer class="flex items-center justify-start gap-2 p-4 w-full">
+				<ThemeIcon />
+			</footer>
+		</div>
 	</body>
 </html>
-<style is:global>
-	:root {
-		--accent: 136, 58, 234;
-		--accent-light: 224, 204, 250;
-		--accent-dark: 49, 10, 101;
-		--accent-gradient: linear-gradient(
-			45deg,
-			rgb(var(--accent)),
-			rgb(var(--accent-light)) 30%,
-			white 60%
-		);
-	}
-	html {
-		font-family: system-ui, sans-serif;
-		background: #13151a;
-	}
-	code {
-		font-family:
-			Menlo,
-			Monaco,
-			Lucida Console,
-			Liberation Mono,
-			DejaVu Sans Mono,
-			Bitstream Vera Sans Mono,
-			Courier New,
-			monospace;
-	}
-</style>
