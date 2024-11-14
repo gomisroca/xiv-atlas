@@ -1,7 +1,5 @@
 ---
-import { getTest } from "@/utils/queries/test";
 import Layout from "../layouts/Layout.astro";
-const test = await getTest();
 ---
 
 <Layout>
@@ -21,6 +19,5 @@ const test = await getTest();
       So, what are you waiting for? Grab your copy of Final Fantasy XIV and
       start exploring the world of Final Fantasy XIV.
     </p>
-    {test && <p>{test.value}</p>}
   </div>
 </Layout>
