@@ -1,6 +1,6 @@
 // @ts-check
 import { defineConfig } from "astro/config";
-import vercelStatic from "@astrojs/vercel/static";
+import vercel from "@astrojs/vercel/serverless";
 import sitemap from "@astrojs/sitemap";
 import tailwind from "@astrojs/tailwind";
 import icon from "astro-icon";
@@ -13,7 +13,7 @@ export default defineConfig({
     remotePatterns: [{ protocol: "https" }],
   },
   site: "https://xiv-atlas.vercel.app",
-  output: "static",
-  adapter: vercelStatic(),
+  output: "server",
+  adapter: vercel(),
   integrations: [sitemap(), tailwind(), icon(), react()],
 });
