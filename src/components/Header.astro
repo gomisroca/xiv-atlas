@@ -1,12 +1,17 @@
 ---
-import '@fontsource-variable/cinzel';
-import { SITE_TITLE } from '../consts';
+import "@fontsource-variable/cinzel";
+import { SITE_TITLE } from "../consts";
 ---
 
-<header>
+<header class="w-full">
   <nav class="flex items-start justify-between p-4 font-display">
-    <div class="text-2xl font-bold dark:hover:text-cyan-400 duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100">
+    <div
+      class="text-2xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
+    >
       <a href="/">{SITE_TITLE}</a>
+    </div>
+    <div>
+      <a href="/achievements/1" class="text-xl font-bold">Achievements</a>
     </div>
   </nav>
 </header>
