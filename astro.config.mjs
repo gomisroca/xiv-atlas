@@ -8,6 +8,10 @@ import react from "@astrojs/react";
 
 // https://astro.build/config
 export default defineConfig({
+  image: {
+    domains: ["xivapi.com"],
+    remotePatterns: [{ protocol: "https" }],
+  },
   site: "https://xiv-atlas.vercel.app",
   output: "static",
   adapter: vercelStatic(),
