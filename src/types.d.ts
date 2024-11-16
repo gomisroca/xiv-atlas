@@ -11,10 +11,49 @@ export interface Pagination {
 export interface Achievement {
   id: number;
   name: string;
+  description: string;
   icon: string;
+  category: string;
+  patch: string;
 }
 
+export interface Quest {
+  id: number;
+  name: string;
+  icon: string;
+  expansion: string;
+  location: {
+    area: string;
+    region: string;
+  };
+  issuer: string;
+  genre: string;
+}
+
+export interface Instance {
+  id: number;
+  name: string;
+  icon: string;
+  contentType: string;
+  banner: string;
+}
+
+export interface Item {
+  id: number;
+  name: string;
+  description: string;
+  icon: string;
+  jobCategory: string;
+  itemKind: string;
+}
 export interface APIResponse {
   pagination: Pagination;
   results: Achievement[] | null;
+}
+
+type FormattedContent = Achievement | Quest | Instance | Item;
+
+export interface FormattedAPIResponse {
+  pagination: Pagination;
+  results: FormattedContent[];
 }
