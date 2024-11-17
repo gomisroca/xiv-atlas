@@ -1,0 +1,138 @@
+---
+import { Image } from "astro:assets";
+
+interface Props {
+  type: string;
+  item: any;
+}
+
+const { type, item } = Astro.props;
+---
+
+<div
+  class="flex flex-col rounded-lg border bg-white p-4 shadow-sm transition-all hover:shadow-md"
+>
+  {
+    type === "achievements" && (
+      <>
+        <div class="mb-3 flex items-center gap-3">
+          <Image
+            src={`https://xivapi.com${item.icon}`}
+            alt={`${item.name} icon`}
+            width={40}
+            height={40}
+            class="flex-shrink-0 rounded-md"
+          />
+          <h3 class="text-lg font-semibold">{item.name}</h3>
+        </div>
+        <div class="space-y-2">
+          <p class="text-sm text-gray-600">{item.description}</p>
+          <div class="flex flex-wrap gap-2">
+            <span class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+              {item.category}
+            </span>
+            <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-800">
+              Patch {item.patch}
+            </span>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  {
+    type === "quests" && (
+      <>
+        <div class="mb-3 flex items-center gap-3">
+          <Image
+            src={`https://xivapi.com${item.icon}`}
+            alt={`${item.name} icon`}
+            width={40}
+            height={40}
+            class="flex-shrink-0 rounded-md"
+          />
+          <h3 class="text-lg font-semibold">{item.name}</h3>
+        </div>
+        <div class="space-y-2">
+          <div class="flex flex-wrap gap-2">
+            <span class="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-800">
+              {item.expansion}
+            </span>
+            <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+              {item.genre}
+            </span>
+          </div>
+          <div class="text-sm text-gray-600">
+            <p>Issuer: {item.issuer}</p>
+            <p>
+              Location: {item.location?.area}, {item.location?.region}
+            </p>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  {
+    type === "instances" && (
+      <>
+        {item.banner && (
+          <div class="mb-4">
+            <Image
+              src={`https://xivapi.com${item.banner}`}
+              alt={`${item.name} banner`}
+              width={400}
+              height={200}
+              class="w-full rounded-lg object-cover"
+            />
+          </div>
+        )}
+        <div class="mb-3 flex items-center gap-3">
+          <Image
+            src={`https://xivapi.com${item.icon}`}
+            alt={`${item.name} icon`}
+            width={40}
+            height={40}
+            class="flex-shrink-0 rounded-md"
+          />
+          <h3 class="text-lg font-semibold">{item.name}</h3>
+        </div>
+        <span class="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">
+          {item.contentType}
+        </span>
+      </>
+    )
+  }
+
+  {
+    type === "items" && (
+      <>
+        <div class="mb-3 flex items-center gap-3">
+          <Image
+            src={`https://xivapi.com${item.icon}`}
+            alt={`${item.name} icon`}
+            width={40}
+            height={40}
+            class="flex-shrink-0 rounded-md"
+          />
+          <h3 class="text-lg font-semibold">{item.name}</h3>
+        </div>
+        <div class="space-y-2">
+          <p class="text-sm text-gray-600">{item.description}</p>
+          <div class="flex flex-wrap gap-2">
+            {item.jobCategory && (
+              <span class="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">
+                {item.jobCategory}
+              </span>
+            )}
+            {item.itemKind && (
+              <span class="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-800">
+                {item.itemKind}
+              </span>
+            )}
+          </div>
+        </div>
+      </>
+    )
+  }
+</div>
