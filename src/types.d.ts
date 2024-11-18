@@ -1,41 +1,13 @@
-export interface Pagination {
-  page: number;
-  page_next: number | null;
-  page_prev: number | null;
-  page_total: number;
-  results: number;
-  results_per_page: number;
-  results_total: number;
-}
-
 export interface Achievement {
   id: number;
   name: string;
   description: string;
   icon: string;
-  category: string;
-  patch: string;
-}
-
-export interface Quest {
-  id: number;
-  name: string;
-  icon: string;
-  expansion: string;
-  location: {
-    area: string;
-    region: string;
+  title: {
+    feminine: string;
+    masculine: string;
   };
-  issuer: string;
-  genre: string;
-}
-
-export interface Instance {
-  id: number;
-  name: string;
-  icon: string;
-  contentType: string;
-  banner: string;
+  category: string;
 }
 
 export interface Item {
@@ -43,17 +15,169 @@ export interface Item {
   name: string;
   description: string;
   icon: string;
-  jobCategory: string;
-  itemKind: string;
-}
-export interface APIResponse {
-  pagination: Pagination;
-  results: Achievement[] | null;
+  category: string;
+  hq: boolean;
+  itemLevel: number;
+  equipLevel: number;
+  rarity: number;
+  materiaSlotCount: number;
+  glamour: boolean;
+  unique: boolean;
+  stats: object;
 }
 
-type FormattedContent = Achievement | Quest | Instance | Item;
+export interface Quest {
+  id: number;
+  name: string;
+  icon: string;
+  expansion: string;
+  location: string;
+  npc: string;
+  category: string;
+}
+
+export interface Instance {
+  id: number;
+  name: string;
+  icon: string;
+  category: string;
+  banner: string;
+  levelRequired: number;
+  levelSync: number;
+  description: string;
+}
+
+export interface Action {
+  id: number;
+  name: string;
+  description: string;
+  icon: string;
+}
+
+export interface AchievementResponse {
+  row_id: number;
+  fields: {
+    Name: string;
+    Description: string;
+    Icon: {
+      path: string;
+    };
+    Title: {
+      Feminine: string;
+      Masculine: string;
+    };
+    AchievementCategory: {
+      AchievementKind: {
+        Name: string;
+      };
+    };
+  };
+}
+
+interface BaseParam {
+  Name: string;
+}
+export interface ItemResponse {
+  row_id: number;
+  fields: {
+    Name: string;
+    Description: string;
+    Icon: {
+      path: string;
+    };
+    ItemUICategory: {
+      Name: string;
+    };
+    BaseParam: BaseParam[];
+    BaseParamValue: number[];
+    CanBeHq: boolean;
+    ClassJobCategory: {
+      Name: string;
+    };
+    ClassJobRepair: {
+      Name: string;
+    };
+    LevelItem: {
+      value: number;
+    };
+    LevelEquip: number;
+    Rarity: number;
+    MateriaSlotCount: number;
+    IsGlamorous: boolean;
+    IsUnique: boolean;
+  };
+}
+
+export interface QuestResponse {
+  row_id: number;
+  fields: {
+    Name: string;
+    Icon: {
+      path: string;
+    };
+    Expansion: {
+      Name: string;
+    };
+    PlaceName: {
+      Name: string;
+    };
+    IssuerStart: {
+      Singular: string;
+    };
+    JournalGenre: {
+      Name: string;
+    };
+  };
+}
+
+export interface InstanceResponse {
+  row_id: number;
+  fields: {
+    Name: string;
+    Icon: {
+      path: string;
+    };
+    ContentType: {
+      Name: string;
+    };
+    Image: {
+      path: string;
+    };
+    ClassJobLevelRequired: number;
+    ClassJobLevelSync: number;
+    Transient: {
+      Description: string;
+    };
+  };
+}
+
+export interface ActionResponse {
+  row_id: number;
+  fields: {
+    Name: string;
+    Icon: {
+      path: string;
+    };
+  };
+  transient: {
+    "Description@as(html)": string;
+  };
+}
+
+type ResultType =
+  | ActionResponse
+  | ItemResponse
+  | QuestResponse
+  | InstanceResponse
+  | ActionResponse;
+export interface APIResponse {
+  next: string | undefined;
+  results: ResultType[];
+}
+
+type FormattedContent = Achievement | Item | Quest | Instance | Action;
 
 export interface FormattedAPIResponse {
-  pagination: Pagination;
+  next: string | undefined;
   results: FormattedContent[];
 }
