@@ -1,0 +1,181 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { getActions } from "@/utils/queries/actions";
+import { Image } from "astro:assets";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const job = [
+    "gld",
+    "pld",
+    "war",
+    "brd",
+    "thm",
+    "blm",
+    "smn",
+    "mch",
+    "whm",
+    "sch",
+    "ast",
+    "cnj",
+    "rdm",
+    "sam",
+    "nin",
+    "drk",
+    "mnk",
+    "drg",
+    "gnb",
+  ];
+
+  return job.map((job) => ({
+    params: { job: job },
+  }));
+}
+
+const { job } = Astro.params;
+
+// Get initial data using the query function
+const formattedData = await getActions(job);
+const initialItems = formattedData.results;
+const initialCursor = formattedData.next;
+---
+
+<Layout>
+  <infinite-actions-list data-job={job} data-initial-cursor={initialCursor}>
+    <div class="flex flex-col gap-4">
+      {
+        initialItems.map((item) => (
+          <div class="flex flex-row gap-2 rounded-lg border-2 border-zinc-200 bg-zinc-100 p-4 dark:border-zinc-800 dark:bg-zinc-900">
+            <Image
+              src={item.icon}
+              alt={item.name}
+              width={64}
+              height={64}
+              loading="lazy"
+              class="h-16 w-16 rounded-lg"
+            />
+            <div class="flex flex-col gap-2">
+              <h3>{item.name}</h3>
+              <p
+                class="hue-rotate-90 saturate-200 dark:hue-rotate-0 dark:saturate-100"
+                set:html={item.description}
+              />
+            </div>
+          </div>
+        ))
+      }
+      <div class="loading hidden py-4 text-center">
+        <div
+          class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-cyan-600"
+        >
+        </div>
+        <p class="mt-2 text-zinc-200 dark:text-zinc-800">
+          Loading more actions...
+        </p>
+      </div>
+      <div class="error hidden"></div>
+      <div class="loader"></div>
+    </div>
+  </infinite-actions-list>
+
+  <script>
+    class InfiniteActionsList extends HTMLElement {
+      items: any[];
+      cursor: string | null;
+      loading: boolean;
+      error: string | null;
+      loaderObserver: IntersectionObserver;
+
+      constructor() {
+        super();
+        this.items = [];
+        this.cursor = this.dataset.initialCursor || null;
+        this.loading = false;
+        this.error = null;
+
+        this.loaderObserver = new IntersectionObserver(
+          (entries) => {
+            if (
+              entries[0].isIntersecting &&
+              !this.loading &&
+              this.cursor !== null
+            ) {
+              this.fetchData();
+            }
+          },
+          { threshold: 1.0 },
+        );
+      }
+
+      connectedCallback() {
+        this.loaderObserver.observe(this.querySelector(".loader")!);
+      }
+
+      disconnectedCallback() {
+        this.loaderObserver.disconnect();
+      }
+
+      async fetchData() {
+        if (this.loading) return;
+        this.loading = true;
+        this.querySelector(".loading")!.classList.remove("hidden");
+
+        try {
+          const job = this.dataset.job!;
+          const response = await fetch(
+            `/api/actions/${job}?cursor=${this.cursor}`,
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const formattedData = await response.json();
+
+          this.items = [...this.items, ...formattedData.results];
+          this.cursor = formattedData.next ?? null;
+
+          this.renderItems(formattedData.results);
+        } catch (err) {
+          this.error = "An error occurred while fetching data";
+          this.querySelector(".error")!.textContent = this.error;
+          this.querySelector(".error")!.classList.remove("hidden");
+          console.error(err);
+        } finally {
+          this.loading = false;
+          this.querySelector(".loading")!.classList.add("hidden");
+        }
+      }
+
+      renderItems(newItems: any[]) {
+        const container = this.querySelector(".flex-col")!;
+        newItems.forEach((item) => {
+          const itemElement = document.createElement("div");
+          itemElement.className =
+            "flex flex-row gap-2 rounded-lg border-2 border-zinc-200 dark:border-zinc-800 bg-zinc-100 p-4 dark:bg-zinc-900";
+          itemElement.innerHTML = `
+            <img
+              src="${item.icon}"
+              srcset="${item.iconSrcset || ""}"
+              alt="${item.name}"
+              width="${item.iconAttributes.width}"
+              height="${item.iconAttributes.height}"
+              loading="${item.iconAttributes.loading}"
+              decoding="${item.iconAttributes.decoding}"
+              class="h-16 w-16 rounded-lg"
+              onerror="this.src='/fallback-image.jpg'"
+            />
+            <div class="flex flex-col gap-2">
+              <h3>${item.name}</h3>
+              <p class="hue-rotate-90 saturate-200 dark:hue-rotate-0 dark:saturate-100">${item.description}</p>
+            </div>
+          `;
+          container.insertBefore(itemElement, container.lastElementChild);
+        });
+      }
+    }
+
+    customElements.define("infinite-actions-list", InfiniteActionsList);
+  </script>
+</Layout>
