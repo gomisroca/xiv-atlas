@@ -1,5 +1,6 @@
 import type {
   Achievement,
+  Action,
   APIResponse,
   FormattedAPIResponse,
   Instance,
@@ -7,51 +8,80 @@ import type {
   Quest,
 } from "@/types";
 
+function getIconUrl(icon: string) {
+  return `https://beta.xivapi.com/api/1/asset?path=${icon}&format=png`;
+}
+
 class XIVAPIFormatter {
   private formatAchievement(raw: any): Achievement {
     return {
-      id: raw.id,
-      name: raw.name,
-      description: raw.description,
-      icon: raw.icon,
-      category: raw.achievement_category?.name || "",
-      patch: raw.game_patch?.name || "",
-    };
-  }
-
-  private formatQuest(raw: any): Quest {
-    return {
-      id: raw.id,
-      name: raw.name,
-      icon: raw.icon,
-      expansion: raw.expansion?.name || "",
-      location: {
-        area: raw.issuer_location?.map?.place_name?.name || "",
-        region: raw.issuer_location?.map?.place_name_region?.name || "",
+      id: raw.row_id,
+      name: raw.fields.Name,
+      description: raw.fields.Description,
+      icon: getIconUrl(raw.fields.Icon.path),
+      title: {
+        feminine: raw.fields.Title.Feminine,
+        masculine: raw.fields.Title.Masculine,
       },
-      issuer: raw.issuer_start?.name || "",
-      genre: raw.journal_genre?.name || "",
-    };
-  }
-
-  private formatInstance(raw: any): Instance {
-    return {
-      id: raw.id,
-      name: raw.name,
-      icon: raw.icon,
-      contentType: raw.content_type || "",
-      banner: raw.banner || "",
+      category: raw.fields.AchievementCategory.AchievementKind?.Name || "",
     };
   }
 
   private formatItem(raw: any): Item {
     return {
-      id: raw.id,
-      name: raw.name,
-      description: raw.description || "",
-      icon: raw.icon,
-      jobCategory: raw.class_job_category?.name || "",
-      itemKind: raw.item_kind?.name || "",
+      id: raw.row_id,
+      name: raw.fields.Name,
+      description: raw.fields.Description,
+      icon: getIconUrl(raw.fields.Icon.path),
+      category: raw.fields.ItemUICategory.Name,
+      hq: raw.fields.CanBeHq,
+      itemLevel: raw.fields.LevelItem.value,
+      equipLevel: raw.fields.LevelEquip,
+      rarity: raw.fields.Rarity,
+      materiaSlotCount: raw.fields.MateriaSlotCount,
+      glamour: raw.fields.IsGlamorous,
+      unique: raw.fields.IsUnique,
+      stats: raw.fields.BaseParam.reduce(
+        (acc: { [x: string]: any }, param: { Name: string | number }) => {
+          acc[param.Name] = raw.fields.BaseParamValue[param.Name];
+          return acc;
+        },
+        {},
+      ),
+    };
+  }
+
+  private formatQuest(raw: any): Quest {
+    return {
+      id: raw.row_id,
+      name: raw.fields.Name,
+      icon: getIconUrl(raw.fields.Icon.path),
+      expansion: raw.fields.Expansion.Name,
+      location: raw.fields.PlaceName.Name,
+      npc: raw.fields.IssuerStart.Singular,
+      category: raw.fields.JournalGenre.Name,
+    };
+  }
+
+  private formatInstance(raw: any): Instance {
+    return {
+      id: raw.row_id,
+      name: raw.fields.Name,
+      description: raw.fields.Transient.Description,
+      icon: getIconUrl(raw.fields.Icon.path),
+      banner: getIconUrl(raw.fields.Image.path),
+      levelRequired: raw.fields.ClassJobLevelRequired,
+      levelSync: raw.fields.ClassJobLevelSync,
+      category: raw.fields.ContentType.Name,
+    };
+  }
+
+  private formatAction(raw: any): Action {
+    return {
+      id: raw.row_id,
+      name: raw.fields.Name,
+      description: raw.transient["Description@as(html)"],
+      icon: getIconUrl(raw.fields.Icon.path),
     };
   }
 
@@ -61,9 +91,18 @@ class XIVAPIFormatter {
   ): FormattedAPIResponse {
     const formatters = {
       achievements: this.formatAchievement,
-      quests: this.formatQuest,
-      instances: this.formatInstance,
-      items: this.formatItem,
+      other_items: this.formatItem,
+      head_items: this.formatItem,
+      arr_quests: this.formatQuest,
+      hw_quests: this.formatQuest,
+      sb_quests: this.formatQuest,
+      shb_quests: this.formatQuest,
+      ew_quests: this.formatQuest,
+      dt_quests: this.formatQuest,
+      dungeons: this.formatInstance,
+      raids: this.formatInstance,
+      trials: this.formatInstance,
+      actions: this.formatAction,
     };
 
     const formatter = formatters[contentType as keyof typeof formatters];
@@ -72,15 +111,7 @@ class XIVAPIFormatter {
     }
 
     return {
-      pagination: {
-        page: response.pagination.page,
-        page_next: response.pagination.page_next,
-        page_prev: response.pagination.page_prev,
-        page_total: response.pagination.page_total,
-        results: response.pagination.results,
-        results_per_page: response.pagination.results_per_page,
-        results_total: response.pagination.results_total,
-      },
+      next: response.next,
       results:
         response.results?.map((item) => formatter.bind(this)(item)) || [],
     };
