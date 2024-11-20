@@ -28,26 +28,26 @@ export async function getActions(
 
   try {
     // Try to get data from Redis
-    const cachedData = await redis.get(cacheKey);
+    // const cachedData = await redis.get(cacheKey);
 
-    if (cachedData) {
-      console.log(`Cache hit for ${cacheKey}`);
-      // Check if cachedData is already an object
-      if (typeof cachedData === "object" && cachedData !== null) {
-        return cachedData as FormattedAPIResponse;
-      }
-      // If it's a string, try to parse it
-      if (typeof cachedData === "string") {
-        try {
-          return JSON.parse(cachedData) as FormattedAPIResponse;
-        } catch (parseError) {
-          console.error(
-            `Error parsing cached data for ${cacheKey}:`,
-            parseError,
-          );
-        }
-      }
-    }
+    // if (cachedData) {
+    //   console.log(`Cache hit for ${cacheKey}`);
+    //   // Check if cachedData is already an object
+    //   if (typeof cachedData === "object" && cachedData !== null) {
+    //     return cachedData as FormattedAPIResponse;
+    //   }
+    //   // If it's a string, try to parse it
+    //   if (typeof cachedData === "string") {
+    //     try {
+    //       return JSON.parse(cachedData) as FormattedAPIResponse;
+    //     } catch (parseError) {
+    //       console.error(
+    //         `Error parsing cached data for ${cacheKey}:`,
+    //         parseError,
+    //       );
+    //     }
+    //   }
+    // }
 
     console.log(`Cache miss for ${cacheKey}, fetching from API`);
     const cursorEndpoint = cursor ? `&cursor=${cursor}` : "";
@@ -72,39 +72,39 @@ export async function getActions(
     const formattedData = formatter.formatResponse("actions", data);
 
     // Store the formatted data in Redis
-    await redis.set(cacheKey, JSON.stringify(formattedData), { ex: 86400 });
+    // await redis.set(cacheKey, JSON.stringify(formattedData), { ex: 86400 });
 
-    const metaKey = `actions:${actionJob}:meta`;
-    try {
-      const meta = await redis.get(metaKey);
-      let existingMeta: { pages: string[] } = { pages: [] };
+    // const metaKey = `actions:${actionJob}:meta`;
+    // try {
+    //   const meta = await redis.get(metaKey);
+    //   let existingMeta: { pages: string[] } = { pages: [] };
 
-      if (meta !== null) {
-        if (typeof meta === "string") {
-          try {
-            const parsedMeta = JSON.parse(meta);
-            if (
-              parsedMeta &&
-              typeof parsedMeta === "object" &&
-              Array.isArray(parsedMeta.pages)
-            ) {
-              existingMeta = parsedMeta;
-            }
-          } catch (parseError) {
-            console.error("Error parsing meta data:", parseError);
-          }
-        }
-      }
+    //   if (meta !== null) {
+    //     if (typeof meta === "string") {
+    //       try {
+    //         const parsedMeta = JSON.parse(meta);
+    //         if (
+    //           parsedMeta &&
+    //           typeof parsedMeta === "object" &&
+    //           Array.isArray(parsedMeta.pages)
+    //         ) {
+    //           existingMeta = parsedMeta;
+    //         }
+    //       } catch (parseError) {
+    //         console.error("Error parsing meta data:", parseError);
+    //       }
+    //     }
+    //   }
 
-      if (!existingMeta.pages.includes(cacheKey)) {
-        existingMeta.pages.push(cacheKey);
-        await redis.set(metaKey, JSON.stringify(existingMeta), {
-          ex: 86400,
-        });
-      }
-    } catch (metaError) {
-      console.error("Error updating meta information:", metaError);
-    }
+    //   if (!existingMeta.pages.includes(cacheKey)) {
+    //     existingMeta.pages.push(cacheKey);
+    //     await redis.set(metaKey, JSON.stringify(existingMeta), {
+    //       ex: 86400,
+    //     });
+    //   }
+    // } catch (metaError) {
+    //   console.error("Error updating meta information:", metaError);
+    // }
 
     return formattedData;
   } catch (error) {
