@@ -1,8 +1,8 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { getActions } from "@/utils/queries/actions";
 import { getContent } from "@/utils/queries/content";
 import { Image } from "astro:assets";
+import { getBanner, getDescription, getIcon } from "./getters";
 
 export const prerender = true;
 
@@ -20,10 +20,10 @@ export async function getStaticPaths() {
     "dungeons",
     "raids",
     "trials",
-  ];
+  ] as const;
 
   return types.map((type) => ({
-    params: { type: type },
+    params: { type },
   }));
 }
 
@@ -40,21 +40,32 @@ const initialCursor = formattedData.next;
     <div class="flex flex-col gap-4">
       {
         initialItems.map((item) => (
-          <div class="flex flex-row gap-2 rounded-lg border-2 border-zinc-200 bg-zinc-100 p-4 dark:border-zinc-800 dark:bg-zinc-900">
-            <Image
-              src={item.icon}
-              alt={item.name}
-              width={64}
-              height={64}
-              loading="lazy"
-              class="h-16 w-16 rounded-lg"
-            />
-            <div class="flex flex-col gap-2">
-              <h3>{item.name}</h3>
-              <p
-                class="hue-rotate-90 saturate-200 dark:hue-rotate-0 dark:saturate-100"
-                set:html={item.description}
+          <div class="flex flex-col gap-2 rounded-lg border-2 border-zinc-200 bg-zinc-100 p-4 dark:border-zinc-800 dark:bg-zinc-900">
+            {getBanner(item) && (
+              <Image
+                src={getBanner(item)!}
+                alt={item.name}
+                width={200}
+                height={65}
+                loading="lazy"
+                class="w-full rounded-lg"
               />
+            )}
+            <div class="flex flex-row gap-2">
+              {getIcon(item) && (
+                <Image
+                  src={getIcon(item)!}
+                  alt={item.name}
+                  width={64}
+                  height={64}
+                  loading="lazy"
+                  class="h-16 w-16 rounded-lg"
+                />
+              )}
+              <div class="flex flex-col gap-2">
+                <h3>{item.name}</h3>
+                {getDescription(item) && <p>{getDescription(item)}</p>}
+              </div>
             </div>
           </div>
         ))
@@ -65,7 +76,7 @@ const initialCursor = formattedData.next;
         >
         </div>
         <p class="mt-2 text-zinc-200 dark:text-zinc-800">
-          Loading more actions...
+          Loading more content...
         </p>
       </div>
       <div class="error hidden"></div>
@@ -74,14 +85,15 @@ const initialCursor = formattedData.next;
   </infinite-content-list>
 
   <script>
-    import type { Achievement, Instance, Item, Quest } from "@/types";
+    import type { FormattedContent, FormattedAPIResponse } from "@/types";
+    import { getBanner, getDescription, getIcon } from "./getters";
 
     class InfiniteContentList extends HTMLElement {
-      items: Achievement[] | Quest[] | Item[] | Instance[];
-      cursor: string | null;
-      loading: boolean;
-      error: string | null;
-      loaderObserver: IntersectionObserver;
+      private items: FormattedContent[];
+      private cursor: string | null;
+      private loading: boolean;
+      private error: string | null;
+      private loaderObserver: IntersectionObserver;
 
       constructor() {
         super();
@@ -104,67 +116,109 @@ const initialCursor = formattedData.next;
         );
       }
 
-      connectedCallback() {
-        this.loaderObserver.observe(this.querySelector(".loader")!);
+      connectedCallback(): void {
+        const loader = this.querySelector(".loader");
+        if (loader) {
+          this.loaderObserver.observe(loader);
+        }
       }
 
-      disconnectedCallback() {
+      disconnectedCallback(): void {
         this.loaderObserver.disconnect();
       }
 
-      async fetchData() {
+      private async fetchData(): Promise<void> {
         if (this.loading) return;
+
+        const loadingElement = this.querySelector(".loading");
+        if (!loadingElement) return;
+
         this.loading = true;
-        this.querySelector(".loading")!.classList.remove("hidden");
+        loadingElement.classList.remove("hidden");
 
         try {
-          const type = this.dataset.type!;
+          const type = this.dataset.type;
+          if (!type) throw new Error("Content type not specified");
+
           const response = await fetch(
             `/api/content/${type}?cursor=${this.cursor}`,
           );
-
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
 
-          const formattedData = await response.json();
-
+          const formattedData: FormattedAPIResponse = await response.json();
           this.items = [...this.items, ...formattedData.results];
           this.cursor = formattedData.next ?? null;
 
           this.renderItems(formattedData.results);
         } catch (err) {
-          this.error = "An error occurred while fetching data";
-          this.querySelector(".error")!.textContent = this.error;
-          this.querySelector(".error")!.classList.remove("hidden");
+          const errorElement = this.querySelector(".error");
+          if (errorElement) {
+            this.error = "An error occurred while fetching data";
+            errorElement.textContent = this.error;
+            errorElement.classList.remove("hidden");
+          }
           console.error(err);
         } finally {
           this.loading = false;
-          this.querySelector(".loading")!.classList.add("hidden");
+          loadingElement.classList.add("hidden");
         }
       }
 
-      renderItems(newItems: any[]) {
-        const container = this.querySelector(".flex-col")!;
+      private renderItems(newItems: FormattedContent[]): void {
+        const container = this.querySelector(".flex-col");
+        if (!container) return;
+
         newItems.forEach((item) => {
           const itemElement = document.createElement("div");
           itemElement.className =
-            "flex flex-row gap-2 rounded-lg border-2 border-zinc-200 dark:border-zinc-800 bg-zinc-100 p-4 dark:bg-zinc-900";
+            "flex flex-col gap-2 rounded-lg border-2 border-zinc-200 bg-zinc-100 p-4 dark:border-zinc-800 dark:bg-zinc-900";
+
+          const bannerSrc = getBanner(item);
+          const iconSrc = getIcon(item);
+          const description = getDescription(item);
+
+          const bannerHtml = bannerSrc
+            ? `<img
+                src="${bannerSrc}"
+                srcset="${item.bannerSrcset || ""}"
+                alt="${item.name}"
+                width="${item.bannerAttributes!.width}"
+                height="${item.bannerAttributes!.height}"
+                loading="${item.bannerAttributes!.loading}"
+                decoding="${item.bannerAttributes!.decoding}"
+                class="w-full rounded-lg"
+                onerror="this.src='/fallback-image.jpg'"
+              />`
+            : "";
+
+          const iconHtml = iconSrc
+            ? `<img
+                src="${iconSrc}"
+                srcset="${item.iconSrcset || ""}"
+                alt="${item.name}"
+                width="${item.iconAttributes!.width}"
+                height="${item.iconAttributes!.height}"
+                loading="${item.iconAttributes!.loading}"
+                decoding="${item.iconAttributes!.decoding}"
+                class="h-16 w-16 rounded-lg"
+                onerror="this.src='/fallback-image.jpg'"
+              />`
+            : "";
+
+          const descriptionHtml = description
+            ? `<p class="hue-rotate-90 saturate-200 dark:hue-rotate-0 dark:saturate-100">${description}</p>`
+            : "";
+
           itemElement.innerHTML = `
-            <img
-              src="${item.icon}"
-              srcset="${item.iconSrcset || ""}"
-              alt="${item.name}"
-              width="${item.iconAttributes.width}"
-              height="${item.iconAttributes.height}"
-              loading="${item.iconAttributes.loading}"
-              decoding="${item.iconAttributes.decoding}"
-              class="h-16 w-16 rounded-lg"
-              onerror="this.src='/fallback-image.jpg'"
-            />
-            <div class="flex flex-col gap-2">
-              <h3>${item.name}</h3>
-              <p class="hue-rotate-90 saturate-200 dark:hue-rotate-0 dark:saturate-100">${item.description}</p>
+            ${bannerHtml}
+            <div class="flex flex-row gap-2">
+              ${iconHtml}
+              <div class="flex flex-col gap-2">
+                <h3>${item.name}</h3>
+                ${descriptionHtml}
+              </div>
             </div>
           `;
           container.insertBefore(itemElement, container.lastElementChild);
