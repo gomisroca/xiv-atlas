@@ -55,7 +55,7 @@ class XIVAPIFormatter {
     return {
       id: raw.row_id,
       name: raw.fields.Name,
-      icon: getIconUrl(raw.fields.Icon.path),
+      banner: getIconUrl(raw.fields.Icon.path),
       expansion: raw.fields.Expansion.Name,
       location: raw.fields.PlaceName.Name,
       npc: raw.fields.IssuerStart.Singular,
