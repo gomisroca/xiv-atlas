@@ -23,24 +23,122 @@ import { Icon } from "astro-icon/components";
         id="nav-menu"
         class="absolute right-0 z-10 mt-2 hidden w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none dark:bg-gray-800"
       >
-        <a
-          href="/content/other_items"
-          class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
-        >
-          Items
-        </a>
-        <a
-          href="/content/dungeons"
-          class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
-        >
-          Dungeons
-        </a>
-        <a
-          href="/content/arr_quests"
-          class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
-        >
-          ARR Quests
-        </a>
+        <!-- Items Dropdown -->
+        <div class="group relative">
+          <button
+            class="flex w-full items-center justify-start gap-x-4 px-4 py-2 text-left text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
+          >
+            <Icon
+              name="mdi:chevron-left"
+              class="h-4 w-4 text-transparent transition duration-200 ease-in-out group-hover:text-cyan-600"
+            />
+            Items
+          </button>
+          <div
+            class="absolute right-full top-0 hidden w-48 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 group-hover:block dark:bg-gray-800"
+          >
+            <a
+              href="/content/other_items"
+              class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
+              >Other</a
+            >
+            <a
+              href="/content/head_items"
+              class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
+              >Head</a
+            >
+            <a
+              href="/content/chest_items"
+              class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
+              >Chest</a
+            >
+            <a
+              href="/content/weapons"
+              class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
+              >Weapons</a
+            >
+          </div>
+        </div>
+
+        <!-- Quests Dropdown -->
+        <div class="group relative">
+          <button
+            class="flex w-full items-center justify-start gap-x-4 px-4 py-2 text-left text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
+          >
+            <Icon
+              name="mdi:chevron-left"
+              class="h-4 w-4 text-transparent transition duration-200 ease-in-out group-hover:text-cyan-600"
+            />
+            Quests
+          </button>
+          <div
+            class="absolute right-full top-0 hidden w-48 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 group-hover:block dark:bg-gray-800"
+          >
+            <a
+              href="/content/arr_quests"
+              class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
+              >A Realm Reborn</a
+            >
+            <a
+              href="/content/hw_quests"
+              class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
+              >Heavensward</a
+            >
+            <a
+              href="/content/sb_quests"
+              class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
+              >Stormblood</a
+            >
+            <a
+              href="/content/shb_quests"
+              class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
+              >Shadowbringers</a
+            >
+            <a
+              href="/content/ew_quests"
+              class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
+              >Endwalker</a
+            >
+            <a
+              href="/content/dt_quests"
+              class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
+              >Dawntrail</a
+            >
+          </div>
+        </div>
+
+        <!-- Instances Dropdown -->
+        <div class="group relative">
+          <button
+            class="flex w-full items-center justify-start gap-x-4 px-4 py-2 text-left text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
+          >
+            <Icon
+              name="mdi:chevron-left"
+              class="h-4 w-4 text-transparent transition duration-200 ease-in-out group-hover:text-cyan-600"
+            />
+            Instances
+          </button>
+          <div
+            class="absolute right-full top-0 hidden w-48 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 group-hover:block dark:bg-gray-800"
+          >
+            <a
+              href="/content/dungeons"
+              class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
+              >Dungeons</a
+            >
+            <a
+              href="/content/raids"
+              class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
+              >Raids</a
+            >
+            <a
+              href="/content/trials"
+              class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
+              >Trials</a
+            >
+          </div>
+        </div>
+
         <a
           href="/content/achievements"
           class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
@@ -52,6 +150,18 @@ import { Icon } from "astro-icon/components";
   </nav>
 </header>
 
+<style>
+  /* Ensure submenus stay visible while hovering */
+  .group:hover > div {
+    display: block;
+  }
+
+  /* Prevent text selection while clicking menus */
+  .group {
+    user-select: none;
+  }
+</style>
+
 <script>
   const navToggle = document.getElementById("nav-toggle");
   const navMenu = document.getElementById("nav-menu");
@@ -61,6 +171,7 @@ import { Icon } from "astro-icon/components";
       navMenu.classList.toggle("hidden");
     });
 
+    // Close menu when clicking outside
     document.addEventListener("click", (event) => {
       if (
         event.target instanceof HTMLElement &&
