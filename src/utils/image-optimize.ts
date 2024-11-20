@@ -7,7 +7,6 @@ async function optimizeImage(
   height: number = 64,
 ) {
   try {
-    // Create a remote image metadata object
     const remoteSrc = {
       src: imageUrl,
       width: width,
@@ -15,7 +14,6 @@ async function optimizeImage(
       format: "webp" as const,
     } as ImageMetadata;
 
-    // Get optimized image using Astro's image service
     const optimized = await getImage({
       src: remoteSrc,
       width: width,
@@ -23,7 +21,12 @@ async function optimizeImage(
       format: "webp",
     });
 
-    return optimized;
+    return {
+      src: optimized.src,
+      srcSet: optimized.srcSet,
+      width: optimized.attributes.width,
+      height: optimized.attributes.height,
+    };
   } catch (error) {
     console.error(`Failed to optimize image: ${imageUrl}`, error);
     return null;
@@ -31,21 +34,38 @@ async function optimizeImage(
 }
 
 export default async function processItem(item: any) {
+  let optimizedItem = item;
   if (item.icon) {
     const optimizedImage = await optimizeImage(item.icon);
     if (optimizedImage) {
-      return {
+      optimizedItem = {
         ...item,
         icon: optimizedImage.src,
         iconSrcset: optimizedImage.srcSet,
         iconAttributes: {
-          width: optimizedImage.attributes.width,
-          height: optimizedImage.attributes.height,
+          width: optimizedImage.width,
+          height: optimizedImage.height,
           loading: "lazy",
           decoding: "async",
         },
       };
     }
   }
-  return item;
+  if (item.banner) {
+    const optimizedImage = await optimizeImage(item.banner);
+    if (optimizedImage) {
+      optimizedItem = {
+        ...optimizedItem,
+        banner: optimizedImage.src,
+        bannerSrcset: optimizedImage.srcSet,
+        bannerAttributes: {
+          width: optimizedImage.width,
+          height: optimizedImage.height,
+          loading: "lazy",
+          decoding: "async",
+        },
+      };
+    }
+  }
+  return optimizedItem;
 }
