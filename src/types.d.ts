@@ -8,6 +8,20 @@ export interface Achievement {
     masculine: string;
   };
   category: string;
+  iconSrcset?: string;
+  iconAttributes?: {
+    width: number;
+    height: number;
+    loading: string;
+    decoding: string;
+  };
+  bannerSrcset?: string;
+  bannerAttributes?: {
+    width: number;
+    height: number;
+    loading: string;
+    decoding: string;
+  };
 }
 
 export interface Item {
@@ -24,16 +38,44 @@ export interface Item {
   glamour: boolean;
   unique: boolean;
   stats: object;
+  iconSrcset?: string;
+  iconAttributes?: {
+    width: number;
+    height: number;
+    loading: string;
+    decoding: string;
+  };
+  bannerSrcset?: string;
+  bannerAttributes?: {
+    width: number;
+    height: number;
+    loading: string;
+    decoding: string;
+  };
 }
 
 export interface Quest {
   id: number;
   name: string;
-  icon: string;
+  banner: string;
   expansion: string;
   location: string;
   npc: string;
   category: string;
+  iconSrcset?: string;
+  iconAttributes?: {
+    width: number;
+    height: number;
+    loading: string;
+    decoding: string;
+  };
+  bannerSrcset?: string;
+  bannerAttributes?: {
+    width: number;
+    height: number;
+    loading: string;
+    decoding: string;
+  };
 }
 
 export interface Instance {
@@ -45,6 +87,20 @@ export interface Instance {
   levelRequired: number;
   levelSync: number;
   description: string;
+  iconSrcset?: string;
+  iconAttributes?: {
+    width: number;
+    height: number;
+    loading: string;
+    decoding: string;
+  };
+  bannerSrcset?: string;
+  bannerAttributes?: {
+    width: number;
+    height: number;
+    loading: string;
+    decoding: string;
+  };
 }
 
 export interface Action {
@@ -52,6 +108,20 @@ export interface Action {
   name: string;
   description: string;
   icon: string;
+  iconSrcset?: string;
+  iconAttributes?: {
+    width: number;
+    height: number;
+    loading: string;
+    decoding: string;
+  };
+  bannerSrcset?: string;
+  bannerAttributes?: {
+    width: number;
+    height: number;
+    loading: string;
+    decoding: string;
+  };
 }
 
 export interface AchievementResponse {
