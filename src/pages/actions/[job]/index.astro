@@ -1,5 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
+import type { Action } from "@/types";
 import { getActions } from "@/utils/queries/actions";
 import { Image } from "astro:assets";
 
@@ -37,7 +38,7 @@ const { job } = Astro.params;
 
 // Get initial data using the query function
 const formattedData = await getActions(job);
-const initialItems = formattedData.results;
+const initialItems = formattedData.results as Action[];
 const initialCursor = formattedData.next;
 ---
 
@@ -80,8 +81,10 @@ const initialCursor = formattedData.next;
   </infinite-actions-list>
 
   <script>
+    import type { Action } from "@/types";
+
     class InfiniteActionsList extends HTMLElement {
-      items: any[];
+      items: Action[];
       cursor: string | null;
       loading: boolean;
       error: string | null;
