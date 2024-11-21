@@ -1,3 +1,4 @@
+import { REDIS_EXPIRATION_TIME } from "@/consts";
 import { Redis } from "@upstash/redis";
 
 const redis = new Redis({
@@ -45,7 +46,7 @@ export async function generateMeta(
     if (!existingMeta.pages.includes(cacheKey)) {
       existingMeta.pages.push(cacheKey);
       await redis.set(metaKey, JSON.stringify(existingMeta), {
-        ex: 120, //86400,
+        ex: REDIS_EXPIRATION_TIME,
       });
     }
   } catch (metaError) {

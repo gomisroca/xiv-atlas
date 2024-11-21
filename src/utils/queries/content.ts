@@ -3,6 +3,7 @@ import redis, { generateMeta, getCacheKey } from "../redis";
 import rateLimit from "../rate-limiter";
 import fetchRetry from "../fetch-retry";
 import { formatter } from "../query-formatter";
+import { REDIS_EXPIRATION_TIME } from "@/consts";
 
 const apiKey = import.meta.env.XIVAPI_KEY;
 const contentTypeEndpoints = {
@@ -47,7 +48,7 @@ async function fetchAndStoreData(
     );
     const cacheKey = getCacheKey("content", contentType, page);
     await redis.set(cacheKey, JSON.stringify(formattedData), {
-      ex: 120, //86400,
+      ex: REDIS_EXPIRATION_TIME,
     });
 
     if (data.next) {

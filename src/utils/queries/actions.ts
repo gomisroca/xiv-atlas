@@ -3,6 +3,7 @@ import redis, { generateMeta, getCacheKey } from "../redis";
 import rateLimit from "../rate-limiter";
 import fetchRetry from "../fetch-retry";
 import { formatter } from "../query-formatter";
+import { REDIS_EXPIRATION_TIME } from "@/consts";
 
 const apiKey = import.meta.env.XIVAPI_KEY;
 const endpoint = `https://beta.xivapi.com/api/1/search?sheets=Action&fields=Name,Icon&transient=Description@as(html)&limit=20&api_key=${apiKey}&query=ClassJobCategory.Name=`;
@@ -30,7 +31,7 @@ async function fetchAndStoreData(
     );
     const cacheKey = getCacheKey("actions", actionJob, page);
     await redis.set(cacheKey, JSON.stringify(formattedData), {
-      ex: 120, //86400,
+      ex: REDIS_EXPIRATION_TIME,
     });
 
     if (data.next) {
