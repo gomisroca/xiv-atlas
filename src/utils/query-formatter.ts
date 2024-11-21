@@ -67,8 +67,7 @@ class XIVAPIFormatter {
     return {
       id: raw.row_id,
       name: raw.fields.Name,
-      description: raw.fields.Transient.Description,
-      icon: getIconUrl(raw.fields.Icon.path),
+      description: raw.transient.Description,
       banner: getIconUrl(raw.fields.Image.path),
       levelRequired: raw.fields.ClassJobLevelRequired,
       levelSync: raw.fields.ClassJobLevelSync,
@@ -87,7 +86,8 @@ class XIVAPIFormatter {
 
   public formatResponse(
     contentType: string,
-    response: APIResponse,
+    nextPage: number,
+    response: APIResponse["results"],
   ): FormattedAPIResponse {
     const formatters = {
       achievements: this.formatAchievement,
@@ -111,9 +111,8 @@ class XIVAPIFormatter {
     }
 
     return {
-      next: response.next,
-      results:
-        response.results?.map((item) => formatter.bind(this)(item)) || [],
+      next: nextPage,
+      results: response.map((item) => formatter.bind(this)(item)) || [],
     };
   }
 }

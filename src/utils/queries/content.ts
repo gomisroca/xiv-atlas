@@ -1,5 +1,5 @@
 import type { APIResponse, FormattedAPIResponse } from "@/types";
-import redis from "../redis";
+import redis, { generateMeta, getCacheKey } from "../redis";
 import rateLimit from "../rate-limiter";
 import fetchRetry from "../fetch-retry";
 import { formatter } from "../query-formatter";
@@ -18,110 +18,87 @@ const contentTypeEndpoints = {
   ew_quests: `https://beta.xivapi.com/api/1/search?sheets=Quest&query=Expansion.Name="Endwalker"&fields=Expansion.Name,Icon,PlaceName.Name,IssuerStart.Singular,JournalGenre.Name,Name&limit=20&api_key=${apiKey}`,
   dt_quests: `https://beta.xivapi.com/api/1/search?sheets=Quest&query=Expansion.Name="Dawntrail"&fields=Expansion.Name,Icon,PlaceName.Name,IssuerStart.Singular,JournalGenre.Name,Name&limit=20&api_key=${apiKey}`,
 
-  dungeons: `https://beta.xivapi.com/api/1/search?sheets=ContentFinderCondition&fields=Icon,Name,ContentType.Name,Image,ClassJobLevelRequired,ClassJobLevelSync,Transient.Description&query=ContentType.Name="Dungeons"&limit=20&api_key=${apiKey}`,
-  raids: `https://beta.xivapi.com/api/1/search?sheets=ContentFinderCondition&fields=Icon,Name,ContentType.Name,Image,ClassJobLevelRequired,ClassJobLevelSync,Transient.Description&query=ContentType.Name="Raids"&limit=20&api_key=${apiKey}`,
-  trials: `https://beta.xivapi.com/api/1/search?sheets=ContentFinderCondition&fields=Icon,Name,ContentType.Name,Image,ClassJobLevelRequired,ClassJobLevelSync,Transient.Description&query=ContentType.Name="Trials"&limit=20&api_key=${apiKey}`,
+  dungeons: `https://beta.xivapi.com/api/1/search?sheets=ContentFinderCondition&fields=Name,ContentType.Name,Image,ClassJobLevelRequired,ClassJobLevelSync&transient=Description&query=ContentType.Name="Dungeons"&limit=20&api_key=${apiKey}`,
+  raids: `https://beta.xivapi.com/api/1/search?sheets=ContentFinderCondition&fields=Name,ContentType.Name,Image,ClassJobLevelRequired,ClassJobLevelSync&transient=Description&query=ContentType.Name="Raids"&limit=20&api_key=${apiKey}`,
+  trials: `https://beta.xivapi.com/api/1/search?sheets=ContentFinderCondition&fields=Name,ContentType.Name,Image,ClassJobLevelRequired,ClassJobLevelSync&transient=Description&query=ContentType.Name="Trials"&limit=20&api_key=${apiKey}`,
 };
 
-// Helper to generate a cache key based on type and cursor
-function getCacheKey(type: string, cursor?: string): string {
-  if (!cursor) {
-    return `content:${type}:page:1`;
-  }
-  return `content:${type}:page:${cursor}`;
-}
-
-function buildApiUrl(contentType: string, cursor?: string): string {
-  const baseQuery =
-    contentTypeEndpoints[contentType as keyof typeof contentTypeEndpoints];
-  if (!baseQuery) {
-    throw new Error(`Invalid content type: ${contentType}`);
-  }
-
-  return baseQuery + (cursor ? `&cursor=${cursor}` : "");
-}
-
-export async function getContent(
+async function fetchAndStoreData(
   contentType: string,
   cursor?: string,
-): Promise<FormattedAPIResponse> {
-  await rateLimit();
-  const currentPage = cursor;
-  const cacheKey = getCacheKey(contentType, cursor);
-
+  page: number = 1,
+) {
   try {
-    // Try to get data from Redis
-    // const cachedData = await redis.get(cacheKey);
+    const cursorEndpoint = cursor ? `&cursor=${cursor}` : "";
+    const endpoint =
+      contentTypeEndpoints[contentType as keyof typeof contentTypeEndpoints];
+    const endpointUrl = endpoint + cursorEndpoint;
+    const res = await fetchRetry(endpointUrl);
 
-    // if (cachedData) {
-    //   console.log(`Cache hit for ${cacheKey}`);
-    //   // Check if cachedData is already an object
-    //   if (typeof cachedData === "object" && cachedData !== null) {
-    //     return cachedData as FormattedAPIResponse;
-    //   }
-    //   // If it's a string, try to parse it
-    //   if (typeof cachedData === "string") {
-    //     try {
-    //       return JSON.parse(cachedData) as FormattedAPIResponse;
-    //     } catch (parseError) {
-    //       console.error(
-    //         `Error parsing cached data for ${cacheKey}:`,
-    //         parseError,
-    //       );
-    //     }
-    //   }
-    // }
-
-    console.log(`Cache miss for ${cacheKey}, fetching from API`);
-    const endpoint = buildApiUrl(contentType, currentPage);
-
-    const res = await fetchRetry(endpoint);
     if (!res.ok) {
       throw new Error(`API responded with status: ${res.status}`);
     }
 
-    let data: APIResponse = await res.json();
+    const data: APIResponse = await res.json();
+    const formattedData = formatter.formatResponse(
+      contentType,
+      page + 1,
+      data.results,
+    );
+    const cacheKey = getCacheKey("content", contentType, page);
+    await redis.set(cacheKey, JSON.stringify(formattedData), {
+      ex: 120, //86400,
+    });
 
-    // Format the data before caching
-    const formattedData = formatter.formatResponse(contentType, data);
-    console.log(formattedData);
+    if (data.next) {
+      void fetchAndStoreData(contentType, data.next, page + 1);
+    }
+  } catch (error) {
+    console.error(`Error fetching ${contentType}:`, error);
+    throw error;
+  }
+}
 
-    // Store the formatted data in Redis
-    // await redis.set(cacheKey, JSON.stringify(formattedData), { ex: 86400 });
+export async function getContent(
+  contentType: string,
+  page: number = 1,
+): Promise<FormattedAPIResponse> {
+  await rateLimit();
+  const cacheKey = getCacheKey("content", contentType, page);
 
-    // const metaKey = `actions:${contentType}:meta`;
-    // try {
-    //   const meta = await redis.get(metaKey);
-    //   let existingMeta: { pages: string[] } = { pages: [] };
+  try {
+    let cachedData: FormattedAPIResponse | null = await redis.get(cacheKey);
 
-    //   if (meta !== null) {
-    //     if (typeof meta === "string") {
-    //       try {
-    //         const parsedMeta = JSON.parse(meta);
-    //         if (
-    //           parsedMeta &&
-    //           typeof parsedMeta === "object" &&
-    //           Array.isArray(parsedMeta.pages)
-    //         ) {
-    //           existingMeta = parsedMeta;
-    //         }
-    //       } catch (parseError) {
-    //         console.error("Error parsing meta data:", parseError);
-    //       }
-    //     }
-    //   }
+    if (cachedData) {
+      console.log(`Cache hit for ${cacheKey}`);
+      // Check if cachedData is already an object
+      if (typeof cachedData === "object" && cachedData !== null) {
+        return cachedData as FormattedAPIResponse;
+      }
+      // If it's a string, try to parse it
+      if (typeof cachedData === "string") {
+        try {
+          return JSON.parse(cachedData) as FormattedAPIResponse;
+        } catch (parseError) {
+          console.error(
+            `Error parsing cached data for ${cacheKey}:`,
+            parseError,
+          );
+        }
+      }
+    }
 
-    //   if (!existingMeta.pages.includes(cacheKey)) {
-    //     existingMeta.pages.push(cacheKey);
-    //     await redis.set(metaKey, JSON.stringify(existingMeta), {
-    //       ex: 86400,
-    //     });
-    //   }
-    // } catch (metaError) {
-    //   console.error("Error updating meta information:", metaError);
-    // }
+    console.log(`Cache miss for ${cacheKey}, fetching from API`);
+    await fetchAndStoreData(contentType);
+    // Try to get data from Redis again
+    cachedData = await redis.get(cacheKey);
+    // Generate meta redis store for the content type
+    await generateMeta("content", contentType, cacheKey);
 
-    return formattedData;
+    if (!cachedData) {
+      throw new Error(`No data found for ${contentType}`);
+    }
+    return cachedData;
   } catch (error) {
     console.error(`Error fetching ${contentType}:`, error);
     throw error; // Re-throw the error for the caller to handle
@@ -131,15 +108,15 @@ export async function getContent(
 // Helper function to preload next page
 export async function preloadNextPage(
   contentType: string,
-  cursor: string,
+  page: number,
 ): Promise<void> {
   try {
-    const nextCacheKey = getCacheKey(contentType, cursor);
+    const nextCacheKey = getCacheKey("content", contentType, page);
     const exists = await redis.exists(nextCacheKey);
 
     if (!exists) {
       // Trigger fetch but don't await it
-      getContent(contentType, cursor).catch(console.error);
+      getContent(contentType, page).catch(console.error);
     }
   } catch (error) {
     console.error(`Error preloading next page for ${contentType}:`, error);

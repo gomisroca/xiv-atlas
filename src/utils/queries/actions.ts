@@ -1,9 +1,5 @@
-import type {
-  ActionResponse,
-  APIResponse,
-  FormattedAPIResponse,
-} from "@/types";
-import redis from "../redis";
+import type { APIResponse, FormattedAPIResponse } from "@/types";
+import redis, { generateMeta, getCacheKey } from "../redis";
 import rateLimit from "../rate-limiter";
 import fetchRetry from "../fetch-retry";
 import { formatter } from "../query-formatter";
@@ -11,102 +7,81 @@ import { formatter } from "../query-formatter";
 const apiKey = import.meta.env.XIVAPI_KEY;
 const endpoint = `https://beta.xivapi.com/api/1/search?sheets=Action&fields=Name,Icon&transient=Description@as(html)&limit=20&api_key=${apiKey}&query=ClassJobCategory.Name=`;
 
-// Helper to generate a cache key based on job and cursor
-function getCacheKey(actionJob: string, cursor?: string): string {
-  if (!cursor) {
-    return `actions:${actionJob}:page:1`;
-  }
-  return `actions:${actionJob}:page:${cursor}`;
-}
-
-export async function getActions(
+async function fetchAndStoreData(
   actionJob: string,
   cursor?: string,
-): Promise<FormattedAPIResponse> {
-  await rateLimit();
-  const cacheKey = getCacheKey(actionJob, cursor);
-
+  page: number = 1,
+) {
   try {
-    // Try to get data from Redis
-    // const cachedData = await redis.get(cacheKey);
-
-    // if (cachedData) {
-    //   console.log(`Cache hit for ${cacheKey}`);
-    //   // Check if cachedData is already an object
-    //   if (typeof cachedData === "object" && cachedData !== null) {
-    //     return cachedData as FormattedAPIResponse;
-    //   }
-    //   // If it's a string, try to parse it
-    //   if (typeof cachedData === "string") {
-    //     try {
-    //       return JSON.parse(cachedData) as FormattedAPIResponse;
-    //     } catch (parseError) {
-    //       console.error(
-    //         `Error parsing cached data for ${cacheKey}:`,
-    //         parseError,
-    //       );
-    //     }
-    //   }
-    // }
-
-    console.log(`Cache miss for ${cacheKey}, fetching from API`);
     const cursorEndpoint = cursor ? `&cursor=${cursor}` : "";
-    const jobEndpoint =
+    const endpointUrl =
       endpoint + `"${actionJob.toUpperCase()}"` + cursorEndpoint;
-    if (!jobEndpoint) {
-      throw new Error(`Invalid content type: ${actionJob}`);
-    }
+    const res = await fetchRetry(endpointUrl);
 
-    const res = await fetchRetry(jobEndpoint);
     if (!res.ok) {
       throw new Error(`API responded with status: ${res.status}`);
     }
 
-    let data: APIResponse = await res.json();
-    let results = data.results as ActionResponse[];
-    results = results?.filter(
-      (item) => item.fields.Name && item.transient["Description@as(html)"],
+    const data: APIResponse = await res.json();
+    const formattedData = formatter.formatResponse(
+      actionJob,
+      page + 1,
+      data.results,
     );
-    data.results = results;
-    // Format the data before caching
-    const formattedData = formatter.formatResponse("actions", data);
+    const cacheKey = getCacheKey("actions", actionJob, page);
+    await redis.set(cacheKey, JSON.stringify(formattedData), {
+      ex: 120, //86400,
+    });
 
-    // Store the formatted data in Redis
-    // await redis.set(cacheKey, JSON.stringify(formattedData), { ex: 86400 });
+    if (data.next) {
+      void fetchAndStoreData(actionJob, data.next, page + 1);
+    }
+  } catch (error) {
+    console.error(`Error fetching ${actionJob}:`, error);
+    throw error;
+  }
+}
 
-    // const metaKey = `actions:${actionJob}:meta`;
-    // try {
-    //   const meta = await redis.get(metaKey);
-    //   let existingMeta: { pages: string[] } = { pages: [] };
+export async function getActions(
+  actionJob: string,
+  page: number = 1,
+): Promise<FormattedAPIResponse> {
+  await rateLimit();
+  const cacheKey = getCacheKey("actions", actionJob, page);
 
-    //   if (meta !== null) {
-    //     if (typeof meta === "string") {
-    //       try {
-    //         const parsedMeta = JSON.parse(meta);
-    //         if (
-    //           parsedMeta &&
-    //           typeof parsedMeta === "object" &&
-    //           Array.isArray(parsedMeta.pages)
-    //         ) {
-    //           existingMeta = parsedMeta;
-    //         }
-    //       } catch (parseError) {
-    //         console.error("Error parsing meta data:", parseError);
-    //       }
-    //     }
-    //   }
+  try {
+    let cachedData: FormattedAPIResponse | null = await redis.get(cacheKey);
 
-    //   if (!existingMeta.pages.includes(cacheKey)) {
-    //     existingMeta.pages.push(cacheKey);
-    //     await redis.set(metaKey, JSON.stringify(existingMeta), {
-    //       ex: 86400,
-    //     });
-    //   }
-    // } catch (metaError) {
-    //   console.error("Error updating meta information:", metaError);
-    // }
+    if (cachedData) {
+      console.log(`Cache hit for ${cacheKey}`);
+      // Check if cachedData is already an object
+      if (typeof cachedData === "object" && cachedData !== null) {
+        return cachedData as FormattedAPIResponse;
+      }
+      // If it's a string, try to parse it
+      if (typeof cachedData === "string") {
+        try {
+          return JSON.parse(cachedData) as FormattedAPIResponse;
+        } catch (parseError) {
+          console.error(
+            `Error parsing cached data for ${cacheKey}:`,
+            parseError,
+          );
+        }
+      }
+    }
 
-    return formattedData;
+    console.log(`Cache miss for ${cacheKey}, fetching from API`);
+    await fetchAndStoreData(actionJob);
+    // Try to get data from Redis again
+    cachedData = await redis.get(cacheKey);
+    // Generate meta redis store for the content type
+    await generateMeta("actions", actionJob, cacheKey);
+
+    if (!cachedData) {
+      throw new Error(`No data found for ${actionJob}`);
+    }
+    return cachedData;
   } catch (error) {
     console.error(`Error fetching ${actionJob}:`, error);
     throw error; // Re-throw the error for the caller to handle
@@ -116,15 +91,15 @@ export async function getActions(
 // Helper function to preload next page
 export async function preloadNextPage(
   actionJob: string,
-  cursor: string,
+  page: number,
 ): Promise<void> {
   try {
-    const nextCacheKey = getCacheKey(actionJob, cursor);
+    const nextCacheKey = getCacheKey("actions", actionJob, page);
     const exists = await redis.exists(nextCacheKey);
 
     if (!exists) {
       // Trigger fetch but don't await it
-      getActions(actionJob, cursor).catch(console.error);
+      getActions(actionJob, page).catch(console.error);
     }
   } catch (error) {
     console.error(`Error preloading next page for ${actionJob}:`, error);
