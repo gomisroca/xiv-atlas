@@ -3,7 +3,7 @@ import redis, { generateMeta, getCacheKey } from "../redis";
 import rateLimit from "../rate-limiter";
 import fetchRetry from "../fetch-retry";
 import { formatter } from "../query-formatter";
-import { REDIS_EXPIRATION_TIME } from "@/consts";
+import { REDIS_EXPIRATION_TIME } from "../../consts";
 
 const apiKey = import.meta.env.XIVAPI_KEY;
 const contentTypeEndpoints = {
