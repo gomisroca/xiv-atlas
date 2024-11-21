@@ -25,7 +25,7 @@ async function fetchAndStoreData(
 
     const data: APIResponse = await res.json();
     const formattedData = formatter.formatResponse(
-      actionJob,
+      "actions",
       page + 1,
       data.results,
     );
