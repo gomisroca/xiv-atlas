@@ -20,7 +20,20 @@ export function isQuest(item: FormattedContent): item is Quest {
 }
 
 export function isInstance(item: FormattedContent): item is Instance {
-  return "levelRequired" in item && "icon" in item && "description" in item;
+  return (
+    typeof item === "object" &&
+    item !== null &&
+    "levelRequired" in item &&
+    typeof item.levelRequired === "number" &&
+    "levelSync" in item &&
+    typeof item.levelSync === "number" &&
+    "icon" in item &&
+    typeof item.icon === "string" &&
+    "banner" in item &&
+    typeof item.banner === "string" &&
+    "description" in item &&
+    typeof item.description === "string"
+  );
 }
 
 export function isAction(item: FormattedContent): item is Action {
