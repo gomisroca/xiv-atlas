@@ -81,7 +81,6 @@ export interface Quest {
 export interface Instance {
   id: number;
   name: string;
-  icon: string;
   category: string;
   banner: string;
   levelRequired: number;
@@ -204,9 +203,6 @@ export interface InstanceResponse {
   row_id: number;
   fields: {
     Name: string;
-    Icon: {
-      path: string;
-    };
     ContentType: {
       Name: string;
     };
@@ -215,9 +211,9 @@ export interface InstanceResponse {
     };
     ClassJobLevelRequired: number;
     ClassJobLevelSync: number;
-    Transient: {
-      Description: string;
-    };
+  };
+  transient: {
+    Description: string;
   };
 }
 
@@ -248,6 +244,6 @@ export interface APIResponse {
 type FormattedContent = Achievement | Item | Quest | Instance | Action;
 
 export interface FormattedAPIResponse {
-  next: string | undefined;
+  next: number | undefined;
   results: FormattedContent[];
 }
