@@ -84,16 +84,16 @@ const initialCursor = formattedData.next;
     import type { Action } from "@/types";
 
     class InfiniteActionsList extends HTMLElement {
-      items: Action[];
-      cursor: string | null;
-      loading: boolean;
-      error: string | null;
-      loaderObserver: IntersectionObserver;
+      private items: Action[];
+      private cursor: number | null;
+      private loading: boolean;
+      private error: string | null;
+      private loaderObserver: IntersectionObserver;
 
       constructor() {
         super();
         this.items = [];
-        this.cursor = this.dataset.initialCursor || null;
+        this.cursor = Number(this.dataset.initialCursor) || null;
         this.loading = false;
         this.error = null;
 
@@ -111,61 +111,75 @@ const initialCursor = formattedData.next;
         );
       }
 
-      connectedCallback() {
-        this.loaderObserver.observe(this.querySelector(".loader")!);
+      connectedCallback(): void {
+        const loader = this.querySelector(".loader");
+        if (loader) {
+          this.loaderObserver.observe(loader);
+        }
       }
 
-      disconnectedCallback() {
+      disconnectedCallback(): void {
         this.loaderObserver.disconnect();
       }
 
-      async fetchData() {
+      private async fetchData(): Promise<void> {
         if (this.loading) return;
+
+        const loadingElement = this.querySelector(".loading");
+        if (!loadingElement) return;
+
         this.loading = true;
-        this.querySelector(".loading")!.classList.remove("hidden");
+        loadingElement.classList.remove("hidden");
 
         try {
-          const job = this.dataset.job!;
-          const response = await fetch(
-            `/api/actions/${job}?cursor=${this.cursor}`,
-          );
+          const job = this.dataset.job;
+          if (!job) throw new Error("Action job not specified");
 
+          const response = await fetch(
+            `/api/actions/${job}?page=${this.cursor}`,
+          );
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
 
           const formattedData = await response.json();
-
           this.items = [...this.items, ...formattedData.results];
           this.cursor = formattedData.next ?? null;
 
           this.renderItems(formattedData.results);
         } catch (err) {
-          this.error = "An error occurred while fetching data";
-          this.querySelector(".error")!.textContent = this.error;
-          this.querySelector(".error")!.classList.remove("hidden");
+          const errorElement = this.querySelector(".error");
+          if (errorElement) {
+            this.error = "An error occurred while fetching data";
+            errorElement.textContent = this.error;
+            errorElement.classList.remove("hidden");
+          }
           console.error(err);
         } finally {
           this.loading = false;
-          this.querySelector(".loading")!.classList.add("hidden");
+          loadingElement.classList.add("hidden");
         }
       }
 
-      renderItems(newItems: any[]) {
-        const container = this.querySelector(".flex-col")!;
+      private renderItems(newItems: Action[]): void {
+        const container = this.querySelector(".flex-col");
+        if (!container) return;
+
         newItems.forEach((item) => {
           const itemElement = document.createElement("div");
+
           itemElement.className =
             "flex flex-row gap-2 rounded-lg border-2 border-zinc-200 dark:border-zinc-800 bg-zinc-100 p-4 dark:bg-zinc-900";
+
           itemElement.innerHTML = `
             <img
               src="${item.icon}"
               srcset="${item.iconSrcset || ""}"
               alt="${item.name}"
-              width="${item.iconAttributes.width}"
-              height="${item.iconAttributes.height}"
-              loading="${item.iconAttributes.loading}"
-              decoding="${item.iconAttributes.decoding}"
+              width="${item.iconAttributes!.width}"
+              height="${item.iconAttributes!.height}"
+              loading="${item.iconAttributes!.loading}"
+              decoding="${item.iconAttributes!.decoding}"
               class="h-16 w-16 rounded-lg"
               onerror="this.src='/fallback-image.jpg'"
             />
@@ -174,6 +188,7 @@ const initialCursor = formattedData.next;
               <p class="hue-rotate-90 saturate-200 dark:hue-rotate-0 dark:saturate-100">${item.description}</p>
             </div>
           `;
+
           container.insertBefore(itemElement, container.lastElementChild);
         });
       }

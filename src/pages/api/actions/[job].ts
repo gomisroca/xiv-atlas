@@ -5,7 +5,7 @@ import type { APIRoute } from "astro";
 export const GET: APIRoute = async ({ params, url }) => {
   try {
     const { job } = params;
-    const cursor = url.searchParams.get("cursor");
+    const page = url.searchParams.get("page");
 
     if (!job) {
       return new Response(
@@ -16,7 +16,7 @@ export const GET: APIRoute = async ({ params, url }) => {
       );
     }
 
-    const data = await getActions(job, cursor || undefined);
+    const data = await getActions(job, Number(page) || undefined);
     // Process all images in parallel
     const optimizedResults = await Promise.all(data.results.map(processItem));
     // Create the response with optimized data

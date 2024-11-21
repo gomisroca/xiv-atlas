@@ -90,7 +90,7 @@ const initialCursor = formattedData.next;
 
     class InfiniteContentList extends HTMLElement {
       private items: FormattedContent[];
-      private cursor: string | null;
+      private cursor: number | null;
       private loading: boolean;
       private error: string | null;
       private loaderObserver: IntersectionObserver;
@@ -98,7 +98,7 @@ const initialCursor = formattedData.next;
       constructor() {
         super();
         this.items = [];
-        this.cursor = this.dataset.initialCursor || null;
+        this.cursor = Number(this.dataset.initialCursor) || null;
         this.loading = false;
         this.error = null;
 
@@ -141,7 +141,7 @@ const initialCursor = formattedData.next;
           if (!type) throw new Error("Content type not specified");
 
           const response = await fetch(
-            `/api/content/${type}?cursor=${this.cursor}`,
+            `/api/content/${type}?page=${this.cursor}`,
           );
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -172,6 +172,7 @@ const initialCursor = formattedData.next;
 
         newItems.forEach((item) => {
           const itemElement = document.createElement("div");
+
           itemElement.className =
             "flex flex-col gap-2 rounded-lg border-2 border-zinc-200 bg-zinc-100 p-4 dark:border-zinc-800 dark:bg-zinc-900";
 
@@ -212,7 +213,7 @@ const initialCursor = formattedData.next;
             : "";
 
           itemElement.innerHTML = `
-            ${bannerHtml}
+            <div>${bannerHtml}</div>
             <div class="flex flex-row gap-2">
               ${iconHtml}
               <div class="flex flex-col gap-2">
@@ -221,6 +222,7 @@ const initialCursor = formattedData.next;
               </div>
             </div>
           `;
+
           container.insertBefore(itemElement, container.lastElementChild);
         });
       }
