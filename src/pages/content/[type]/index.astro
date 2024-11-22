@@ -2,7 +2,15 @@
 import Layout from "@/layouts/Layout.astro";
 import { getContent } from "@/utils/queries/content";
 import { Image } from "astro:assets";
-import { getBanner, getDescription, getIcon } from "./getters";
+import {
+  getAchievementUtils,
+  getBanner,
+  getDescription,
+  getIcon,
+  getInstanceUtils,
+  getItemUtils,
+  getQuestUtils,
+} from "./getters";
 
 export const prerender = true;
 
@@ -11,6 +19,27 @@ export async function getStaticPaths() {
     "achievements",
     "other_items",
     "head_items",
+    "pld_items",
+    "war_items",
+    "drk_items",
+    "gnb_items",
+    "whm_items",
+    "sch_items",
+    "ast_items",
+    "sge_items",
+    "mnk_items",
+    "drg_items",
+    "nin_items",
+    "sam_items",
+    "rpr_items",
+    "vpr_items",
+    "brd_items",
+    "mch_items",
+    "dnc_items",
+    "blm_items",
+    "smn_items",
+    "rdm_items",
+    "pct_items",
     "arr_quests",
     "hw_quests",
     "sb_quests",
@@ -63,8 +92,68 @@ const initialCursor = formattedData.next;
                 />
               )}
               <div class="flex flex-col gap-2">
-                <h3>{item.name}</h3>
+                <h3 class={getItemUtils(item)!.rarity === 4 ? "text-purple-500" : getItemUtils(item)!.rarity === 3 ? "text-blue-500" : getItemUtils(item)!.rarity === 2 ? "text-green-500" : ""}>{item.name}</h3>
                 {getDescription(item) && <p>{getDescription(item)}</p>}
+                {getQuestUtils(item) && (
+                  <div class="flex flex-row gap-2">
+                    <p class="text-sm">{getQuestUtils(item)!.location}</p>
+                    <p class="text-sm">{getQuestUtils(item)!.npc}</p>
+                  </div>
+                )}
+                {getInstanceUtils(item) && (
+                  <div class="flex flex-col gap-2">
+                    {getInstanceUtils(item)!.levelRequired && (
+                      <p>
+                        Level Required: {getInstanceUtils(item)!.levelRequired}
+                      </p>
+                    )}
+                    {getInstanceUtils(item)!.levelSync && (
+                      <p>
+                        Level Sync: {getInstanceUtils(item)!.levelSync}
+                      </p>
+                    )}
+                  </div>
+                )}
+                {getItemUtils(item) && (
+                  <div class="flex flex-col gap-2">
+                    <p class="text-sm gap-4 flex flex-row">
+                      <span>HQ {getItemUtils(item)!.hq ? "✔" : "✖"} </span>
+                      <span>Unique {getItemUtils(item)!.unique ? "✔" : "✖"} </span>
+                      <span>Glamour {getItemUtils(item)!.glamour ? "✔" : "✖"} </span>
+                    </p>
+                      {getItemUtils(item)!.itemLevel && (
+                        <p class="text-sm">
+                          Item Level: {getItemUtils(item)!.itemLevel}
+                        </p>
+                      )}
+                      {getItemUtils(item)!.equipLevel && (
+                        <p class="text-sm">
+                          Equip Level: {getItemUtils(item)!.equipLevel}
+                        </p>
+                      )}
+                      {getItemUtils(item)!.materiaSlotCount > 0 &&(
+                        <p class="text-sm">
+                          Materia Slots: {getItemUtils(item)!.materiaSlotCount}
+                        </p>
+                      )}
+                  </div>
+                )}
+                {getAchievementUtils(item) && (
+                  <div class="flex flex-row gap-2">
+                    <p class="text-sm">
+                      {getAchievementUtils(item)!.category}
+                      {getAchievementUtils(item)!.title.masculine && (
+                        <span>
+                          {getAchievementUtils(item)!.title.masculine}
+                        </span>
+                        <span>-</span>
+                        <span>
+                          {getAchievementUtils(item)!.title.feminine}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -86,7 +175,15 @@ const initialCursor = formattedData.next;
 
   <script>
     import type { FormattedContent, FormattedAPIResponse } from "@/types";
-    import { getBanner, getDescription, getIcon } from "./getters";
+    import {
+      getBanner,
+      getDescription,
+      getIcon,
+      getQuestUtils,
+      getInstanceUtils,
+      getItemUtils,
+      getAchievementUtils,
+    } from "./getters";
 
     class InfiniteContentList extends HTMLElement {
       private items: FormattedContent[];
@@ -179,6 +276,10 @@ const initialCursor = formattedData.next;
           const bannerSrc = getBanner(item);
           const iconSrc = getIcon(item);
           const description = getDescription(item);
+          const questUtils = getQuestUtils(item);
+          const instanceUtils = getInstanceUtils(item);
+          const itemUtils = getItemUtils(item);
+          const achievementUtils = getAchievementUtils(item);
 
           const bannerHtml = bannerSrc
             ? `<img
@@ -212,13 +313,85 @@ const initialCursor = formattedData.next;
             ? `<p class="hue-rotate-90 saturate-200 dark:hue-rotate-0 dark:saturate-100">${description}</p>`
             : "";
 
+          const questUtilsHtml = questUtils
+            ? `<div class="flex flex-row gap-2">
+                <p class="text-sm">
+                  ${questUtils.location}
+                </p>
+                <p class="text-sm">
+                  ${questUtils.npc}
+                </p>
+              </div>`
+            : "";
+
+          const instanceUtilsHtml = instanceUtils
+            ? `<div class="flex flex-row gap-2">
+                <p class="text-sm">
+                  ${instanceUtils.levelRequired}
+                  ${instanceUtils.levelSync}
+                </p>
+              </div>`
+            : "";
+
+          const itemUtilsHtml = itemUtils
+            ? `<div class="flex flex-col gap-2">
+                    <p class="text-sm gap-4 flex flex-row">
+                      <span>HQ ${itemUtils.hq ? "✔" : "✖"} </span>
+                      <span>Unique ${itemUtils.unique ? "✔" : "✖"} </span>
+                      <span>Glamour ${itemUtils.glamour ? "✔" : "✖"} </span>
+                    </p>
+                    ${itemUtils.itemLevel ? 
+                    `<p class="text-sm">
+                      Item Level: ${itemUtils.itemLevel}
+                    </p>` : ''}
+                      ${itemUtils.equipLevel ? 
+                    `<p class="text-sm">
+                      Equip Level: ${itemUtils.equipLevel}
+                    </p>` : ''}
+                      ${itemUtils.materiaSlotCount > 0  ? 
+                      `<p class="text-sm">
+                      Materia Slots: ${getItemUtils(item)!.materiaSlotCount}
+                    </p>` : ''}
+                  </div>`
+            : "";
+
+          const achievementUtilsHtml = achievementUtils?.title.masculine
+            ? `<div class="flex flex-row gap-2">
+                <p class="text-sm">
+                  ${achievementUtils.category}
+                  <span>
+                    ${achievementUtils.title.masculine}
+                  </span>
+                  <span>-</span>
+                  <span>
+                    ${achievementUtils.title.feminine}
+                  </span>
+                </p>
+              </div>`
+            : achievementUtils ?
+            `<div class="flex flex-row gap-2">
+                <p class="text-sm">
+                  ${achievementUtils.category}
+                </p>
+              </div>`
+            :"";
+
           itemElement.innerHTML = `
             <div>${bannerHtml}</div>
             <div class="flex flex-row gap-2">
               ${iconHtml}
               <div class="flex flex-col gap-2">
-                <h3>${item.name}</h3>
+                <h3 class="${
+                  getItemUtils(item)?.rarity === 4 ? "text-purple-500" : 
+                  getItemUtils(item)?.rarity === 3 ? "text-blue-500" : 
+                  getItemUtils(item)?.rarity === 2 ? "text-green-500" : 
+                  ""
+                }">${item.name}</h3>
                 ${descriptionHtml}
+                ${questUtilsHtml}
+                ${instanceUtilsHtml}
+                ${itemUtilsHtml}                
+                ${achievementUtilsHtml}
               </div>
             </div>
           `;
