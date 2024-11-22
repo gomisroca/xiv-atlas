@@ -27,7 +27,15 @@ class XIVAPIFormatter {
     };
   }
 
-  private formatItem(raw: any): Item {
+  private formatItem(raw: any): Item | null {
+    if (
+      !raw.fields.Name ||
+      !raw.fields.Icon.path ||
+      raw.fields.Name.length === 0 ||
+      raw.fields.Icon.path === "ui/icon/000000/000000.tex"
+    ) {
+      return null;
+    }
     return {
       id: raw.row_id,
       name: raw.fields.Name,
@@ -51,19 +59,34 @@ class XIVAPIFormatter {
     };
   }
 
-  private formatQuest(raw: any): Quest {
+  private formatQuest(raw: any): Quest | null {
+    if (
+      !raw.fields.Name ||
+      !raw.fields.Icon.path ||
+      raw.fields.Name.length === 0 ||
+      raw.fields.Icon.path === "ui/icon/000000/000000.tex"
+    ) {
+      return null;
+    }
     return {
       id: raw.row_id,
       name: raw.fields.Name,
       banner: getIconUrl(raw.fields.Icon.path),
-      expansion: raw.fields.Expansion.Name,
-      location: raw.fields.PlaceName.Name,
-      npc: raw.fields.IssuerStart.Singular,
-      category: raw.fields.JournalGenre.Name,
+      expansion: raw.fields.Expansion.fields.Name,
+      location: raw.fields.PlaceName.fields.Name,
+      npc: raw.fields.IssuerStart.fields?.Singular,
+      category: raw.fields.JournalGenre.fields.Name,
     };
   }
 
-  private formatInstance(raw: any): Instance {
+  private formatInstance(raw: any): Instance | null {
+    if (
+      !raw.fields.Name ||
+      !raw.fields.Image.path ||
+      raw.fields.Name.length === 0
+    ) {
+      return null;
+    }
     return {
       id: raw.row_id,
       name: raw.fields.Name,
@@ -75,7 +98,15 @@ class XIVAPIFormatter {
     };
   }
 
-  private formatAction(raw: any): Action {
+  private formatAction(raw: any): Action | null {
+    if (
+      !raw.fields.Name ||
+      !raw.fields.Icon.path ||
+      raw.fields.Name.length === 0 ||
+      raw.fields.Icon.path === "ui/icon/000000/000000.tex"
+    ) {
+      return null;
+    }
     return {
       id: raw.row_id,
       name: raw.fields.Name,
@@ -93,6 +124,27 @@ class XIVAPIFormatter {
       achievements: this.formatAchievement,
       other_items: this.formatItem,
       head_items: this.formatItem,
+      pld_items: this.formatItem,
+      war_items: this.formatItem,
+      drk_items: this.formatItem,
+      gnb_items: this.formatItem,
+      whm_items: this.formatItem,
+      sch_items: this.formatItem,
+      ast_items: this.formatItem,
+      sge_items: this.formatItem,
+      mnk_items: this.formatItem,
+      drg_items: this.formatItem,
+      nin_items: this.formatItem,
+      sam_items: this.formatItem,
+      rpr_items: this.formatItem,
+      vpr_items: this.formatItem,
+      brd_items: this.formatItem,
+      mch_items: this.formatItem,
+      dnc_items: this.formatItem,
+      blm_items: this.formatItem,
+      smn_items: this.formatItem,
+      rdm_items: this.formatItem,
+      pct_items: this.formatItem,
       arr_quests: this.formatQuest,
       hw_quests: this.formatQuest,
       sb_quests: this.formatQuest,
@@ -112,7 +164,10 @@ class XIVAPIFormatter {
 
     return {
       next: nextPage,
-      results: response.map((item) => formatter.bind(this)(item)) || [],
+      results:
+        response
+          .map((item) => formatter.bind(this)(item))
+          .filter((item) => item !== null) || [],
     };
   }
 }
