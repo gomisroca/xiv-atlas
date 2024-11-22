@@ -2,6 +2,41 @@
 import "@fontsource-variable/cinzel";
 import { SITE_TITLE } from "../consts";
 import { Icon } from "astro-icon/components";
+
+const quests = [
+  "arr_quests",
+  "hw_quests",
+  "sb_quests",
+  "shb_quests",
+  "ew_quests",
+  "dt_quests",
+];
+
+const instances = ["dungeons", "raids", "trials"];
+
+const jobs = [
+  "pld",
+  "war",
+  "drk",
+  "gnb",
+  "whm",
+  "sch",
+  "ast",
+  "sge",
+  "mnk",
+  "drg",
+  "nin",
+  "sam",
+  "rpr",
+  "vpr",
+  "brd",
+  "mch",
+  "dnc",
+  "blm",
+  "smn",
+  "rdm",
+  "pct",
+];
 ---
 
 <header class="w-full">
@@ -74,36 +109,16 @@ import { Icon } from "astro-icon/components";
           <div
             class="absolute right-full top-0 hidden w-48 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 group-hover:block dark:bg-gray-800"
           >
-            <a
-              href="/content/arr_quests"
-              class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
-              >A Realm Reborn</a
-            >
-            <a
-              href="/content/hw_quests"
-              class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
-              >Heavensward</a
-            >
-            <a
-              href="/content/sb_quests"
-              class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
-              >Stormblood</a
-            >
-            <a
-              href="/content/shb_quests"
-              class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
-              >Shadowbringers</a
-            >
-            <a
-              href="/content/ew_quests"
-              class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
-              >Endwalker</a
-            >
-            <a
-              href="/content/dt_quests"
-              class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
-              >Dawntrail</a
-            >
+            {
+              quests.map((quest) => (
+                <a
+                  href={`/content/${quest}`}
+                  class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
+                >
+                  {quest.split("_")[0].toUpperCase()}
+                </a>
+              ))
+            }
           </div>
         </div>
 
@@ -121,24 +136,44 @@ import { Icon } from "astro-icon/components";
           <div
             class="absolute right-full top-0 hidden w-48 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 group-hover:block dark:bg-gray-800"
           >
-            <a
-              href="/content/dungeons"
-              class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
-              >Dungeons</a
-            >
-            <a
-              href="/content/raids"
-              class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
-              >Raids</a
-            >
-            <a
-              href="/content/trials"
-              class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
-              >Trials</a
-            >
+            {
+              instances.map((instance) => (
+                <a
+                  href={`/content/${instance}`}
+                  class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
+                >
+                  {instance.toUpperCase()}
+                </a>
+              ))
+            }
           </div>
         </div>
-
+        <!-- Actions Dropdown -->
+        <div class="group relative">
+          <button
+            class="flex w-full items-center justify-start gap-x-4 px-4 py-2 text-left text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
+          >
+            <Icon
+              name="mdi:chevron-left"
+              class="h-4 w-4 text-transparent transition duration-200 ease-in-out group-hover:text-cyan-600"
+            />
+            Actions
+          </button>
+          <div
+            class="absolute right-full top-0 hidden w-48 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 group-hover:block dark:bg-gray-800"
+          >
+            {
+              jobs.map((job) => (
+                <a
+                  href={`/actions/${job}`}
+                  class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
+                >
+                  {job.toUpperCase()}
+                </a>
+              ))
+            }
+          </div>
+        </div>
         <a
           href="/content/achievements"
           class="block px-4 py-2 text-xl font-bold duration-200 ease-in-out hover:scale-105 hover:text-cyan-600 active:scale-110 active:text-cyan-500 active:duration-100 dark:hover:text-cyan-400"
