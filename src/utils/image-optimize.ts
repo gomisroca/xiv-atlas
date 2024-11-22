@@ -1,23 +1,19 @@
 import type { ImageMetadata } from "astro";
 import { getImage } from "astro:assets";
 
-async function optimizeImage(
-  imageUrl: string,
-  width: number = 64,
-  height: number = 64,
-) {
+async function optimizeImage(imageUrl: string, type: string = "icon") {
   try {
     const remoteSrc = {
       src: imageUrl,
-      width: width,
-      height: height,
+      width: type === "icon" ? 64 : 200,
+      height: type === "icon" ? 64 : 65,
       format: "webp" as const,
     } as ImageMetadata;
 
     const optimized = await getImage({
       src: remoteSrc,
-      width: width,
-      height: height,
+      width: type === "icon" ? 64 : 200,
+      height: type === "icon" ? 64 : 65,
       format: "webp",
     });
 
@@ -52,7 +48,7 @@ export default async function processItem(item: any) {
     }
   }
   if (item.banner) {
-    const optimizedImage = await optimizeImage(item.banner);
+    const optimizedImage = await optimizeImage(item.banner, "banner");
     if (optimizedImage) {
       optimizedItem = {
         ...optimizedItem,
