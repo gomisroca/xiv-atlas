@@ -8,29 +8,31 @@ export const prerender = true;
 
 export async function getStaticPaths() {
   const job = [
-    "gld",
     "pld",
     "war",
-    "brd",
-    "thm",
-    "blm",
-    "smn",
-    "mch",
+    "drk",
+    "gnb",
     "whm",
     "sch",
     "ast",
-    "cnj",
-    "rdm",
-    "sam",
-    "nin",
-    "drk",
+    "sge",
     "mnk",
     "drg",
-    "gnb",
+    "nin",
+    "sam",
+    "rpr",
+    "vpr",
+    "brd",
+    "mch",
+    "dnc",
+    "blm",
+    "smn",
+    "rdm",
+    "pct",
   ];
 
   return job.map((job) => ({
-    params: { job: job },
+    params: { job },
   }));
 }
 
