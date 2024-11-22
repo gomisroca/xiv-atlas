@@ -16,7 +16,18 @@ export function isItem(item: FormattedContent): item is Item {
 }
 
 export function isQuest(item: FormattedContent): item is Quest {
-  return "banner" in item && "expansion" in item;
+  return (
+    typeof item === "object" &&
+    item !== null &&
+    "banner" in item &&
+    typeof item.banner === "string" &&
+    "expansion" in item &&
+    typeof item.expansion === "string" &&
+    "location" in item &&
+    typeof item.location === "string" &&
+    "npc" in item &&
+    typeof item.npc === "string"
+  );
 }
 
 export function isInstance(item: FormattedContent): item is Instance {
