@@ -92,10 +92,19 @@ const initialCursor = formattedData.next;
                 />
               )}
               <div class="flex flex-col gap-2">
-                <h3 class={
-                  getItemUtils(item)!.rarity && getItemUtils(item)!.rarity === 4 ? "text-purple-500" 
-                : getItemUtils(item)!.rarity && getItemUtils(item)!.rarity === 3 ? "text-blue-500" 
-                : getItemUtils(item)!.rarity && getItemUtils(item)!.rarity === 2 ? "text-green-500" : ""}>{item.name}</h3>
+                {getItemUtils(item)?.rarity ?
+                (
+                  <h3 
+                  class={
+                    getItemUtils(item)!.rarity === 4 ? "text-purple-500" 
+                  : getItemUtils(item)!.rarity === 3 ? "text-blue-500" 
+                  : getItemUtils(item)!.rarity === 2 ? "text-green-500" 
+                  : ""}>{item.name}</h3>
+                )
+                : 
+                (
+                  <h3>{item.name}</h3>
+                )}
                 {getDescription(item) && <p>{getDescription(item)}</p>}
                 {getQuestUtils(item) && (
                   <div class="flex flex-row gap-2">
@@ -283,7 +292,7 @@ const initialCursor = formattedData.next;
           const instanceUtils = getInstanceUtils(item);
           const itemUtils = getItemUtils(item);
           const achievementUtils = getAchievementUtils(item);
-
+          
           const bannerHtml = bannerSrc
             ? `<img
                 src="${bannerSrc}"
@@ -379,17 +388,21 @@ const initialCursor = formattedData.next;
               </div>`
             :"";
 
+          const titleHtml = itemUtils?.rarity ? 
+          `<h3 class="${
+            itemUtils.rarity === 4 ? "text-purple-500" : 
+            itemUtils.rarity === 3 ? "text-blue-500" : 
+            itemUtils.rarity === 2 ? "text-green-500"
+            : ""
+          }">${item.name}</h3>` : 
+          `<h3>${item.name}</h3>`;
+
           itemElement.innerHTML = `
             <div>${bannerHtml}</div>
             <div class="flex flex-row gap-2">
               ${iconHtml}
               <div class="flex flex-col gap-2">
-                <h3 class="${
-                  getItemUtils(item)?.rarity && getItemUtils(item)?.rarity === 4 ? "text-purple-500" : 
-                  getItemUtils(item)?.rarity && getItemUtils(item)?.rarity === 3 ? "text-blue-500" : 
-                  getItemUtils(item)?.rarity && getItemUtils(item)?.rarity === 2 ? "text-green-500" : 
-                  ""
-                }">${item.name}</h3>
+                ${titleHtml}
                 ${descriptionHtml}
                 ${questUtilsHtml}
                 ${instanceUtilsHtml}
