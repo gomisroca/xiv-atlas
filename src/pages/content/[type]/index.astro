@@ -92,7 +92,10 @@ const initialCursor = formattedData.next;
                 />
               )}
               <div class="flex flex-col gap-2">
-                <h3 class={getItemUtils(item)!.rarity === 4 ? "text-purple-500" : getItemUtils(item)!.rarity === 3 ? "text-blue-500" : getItemUtils(item)!.rarity === 2 ? "text-green-500" : ""}>{item.name}</h3>
+                <h3 class={
+                  getItemUtils(item)!.rarity && getItemUtils(item)!.rarity === 4 ? "text-purple-500" 
+                : getItemUtils(item)!.rarity && getItemUtils(item)!.rarity === 3 ? "text-blue-500" 
+                : getItemUtils(item)!.rarity && getItemUtils(item)!.rarity === 2 ? "text-green-500" : ""}>{item.name}</h3>
                 {getDescription(item) && <p>{getDescription(item)}</p>}
                 {getQuestUtils(item) && (
                   <div class="flex flex-row gap-2">
@@ -382,9 +385,9 @@ const initialCursor = formattedData.next;
               ${iconHtml}
               <div class="flex flex-col gap-2">
                 <h3 class="${
-                  getItemUtils(item)?.rarity === 4 ? "text-purple-500" : 
-                  getItemUtils(item)?.rarity === 3 ? "text-blue-500" : 
-                  getItemUtils(item)?.rarity === 2 ? "text-green-500" : 
+                  getItemUtils(item)?.rarity && getItemUtils(item)?.rarity === 4 ? "text-purple-500" : 
+                  getItemUtils(item)?.rarity && getItemUtils(item)?.rarity === 3 ? "text-blue-500" : 
+                  getItemUtils(item)?.rarity && getItemUtils(item)?.rarity === 2 ? "text-green-500" : 
                   ""
                 }">${item.name}</h3>
                 ${descriptionHtml}
