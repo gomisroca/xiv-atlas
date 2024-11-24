@@ -53,8 +53,6 @@ export function isInstance(item: FormattedContent): item is Instance {
     typeof item.levelRequired === "number" &&
     "levelSync" in item &&
     typeof item.levelSync === "number" &&
-    "icon" in item &&
-    typeof item.icon === "string" &&
     "banner" in item &&
     typeof item.banner === "string" &&
     "description" in item &&
