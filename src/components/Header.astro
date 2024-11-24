@@ -197,26 +197,28 @@ const jobs = [
   }
 </style>
 
-<script>
-  const navToggle = document.getElementById("nav-toggle");
-  const navMenu = document.getElementById("nav-menu");
+<script is:inline>
+  document.addEventListener("astro:page-load", () => {
+    const navToggle = document.getElementById("nav-toggle");
+    const navMenu = document.getElementById("nav-menu");
 
-  if (navToggle && navMenu) {
-    navToggle.addEventListener("click", () => {
-      navMenu.classList.toggle("hidden");
-    });
+    if (navToggle && navMenu) {
+      navToggle.addEventListener("click", () => {
+        navMenu.classList.toggle("hidden");
+      });
 
-    // Close menu when clicking outside
-    document.addEventListener("click", (event) => {
-      if (
-        event.target instanceof HTMLElement &&
-        navToggle &&
-        navMenu &&
-        !navToggle.contains(event.target) &&
-        !navMenu.contains(event.target)
-      ) {
-        navMenu.classList.add("hidden");
-      }
-    });
-  }
+      // Close menu when clicking outside
+      document.addEventListener("click", (event) => {
+        if (
+          event.target instanceof HTMLElement &&
+          navToggle &&
+          navMenu &&
+          !navToggle.contains(event.target) &&
+          !navMenu.contains(event.target)
+        ) {
+          navMenu.classList.add("hidden");
+        }
+      });
+    }
+  });
 </script>

@@ -3,6 +3,7 @@ import Layout from "@/layouts/Layout.astro";
 import type { Action } from "@/types";
 import { getActions } from "@/utils/queries/actions";
 import { Image } from "astro:assets";
+import { slide } from "astro:transitions";
 
 export const prerender = true;
 
@@ -49,7 +50,12 @@ const initialCursor = formattedData.next;
     <div class="flex flex-col gap-4">
       {
         initialItems.map((item) => (
-          <div class="flex flex-row gap-2 rounded-lg border-2 border-zinc-200 bg-zinc-100 p-4 dark:border-zinc-800 dark:bg-zinc-900">
+          <div
+            transition:animate={slide({
+              duration: `${Math.floor(Math.random() * (500 - 100 + 1)) + 100}ms`,
+            })}
+            class="flex flex-row gap-2 rounded-lg border-2 border-zinc-200 bg-zinc-100 p-4 dark:border-zinc-800 dark:bg-zinc-900"
+          >
             <Image
               src={item.icon}
               alt={item.name}

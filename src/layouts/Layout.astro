@@ -1,5 +1,6 @@
 ---
 import "@fontsource-variable/lora";
+import { slide, ViewTransitions } from "astro:transitions";
 import BaseHead from "../components/BaseHead.astro";
 import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
 import Header from "../components/Header.astro";
@@ -10,6 +11,7 @@ import ThemeIcon from "../components/ThemeIcon.astro";
 <html lang="en">
   <head>
     <BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+    <ViewTransitions />
   </head>
   <body
     style={{ backgroundImage: "url('/bg.jpg')" }}
@@ -18,13 +20,17 @@ import ThemeIcon from "../components/ThemeIcon.astro";
     <div
       class="flex min-h-screen flex-col items-center justify-start overflow-x-hidden bg-gradient-to-br from-zinc-50 via-zinc-200/90 to-zinc-800/40 dark:from-zinc-950 dark:via-zinc-900/95 dark:to-zinc-900/60"
     >
-      <Header />
+      <Header transition:animate="none" />
       <main
+        transition:animate="fade"
         class="container mx-auto flex flex-1 flex-col items-center justify-start p-4 font-body lg:p-8"
       >
         <slot />
       </main>
-      <footer class="flex w-full items-center justify-start gap-2 p-4">
+      <footer
+        transition:animate="none"
+        class="flex w-full items-center justify-start gap-2 p-4"
+      >
         <ThemeIcon />
       </footer>
     </div>

@@ -11,6 +11,7 @@ import {
   getItemUtils,
   getQuestUtils,
 } from "./getters";
+import { slide } from "astro:transitions";
 
 export const prerender = true;
 
@@ -69,7 +70,11 @@ const initialCursor = formattedData.next;
     <div class="flex flex-col gap-4">
       {
         initialItems.map((item) => (
-          <div class="flex flex-col gap-2 rounded-lg border-2 border-zinc-200 bg-zinc-100 p-4 dark:border-zinc-800 dark:bg-zinc-900">
+          <div 
+            transition:animate={slide({ 
+              duration: `${Math.floor(Math.random() * (500 - 100 + 1)) + 100}ms` 
+            })}
+            class="flex flex-col gap-2 rounded-lg border-2 border-zinc-200 bg-zinc-100 p-4 dark:border-zinc-800 dark:bg-zinc-900">
             {getBanner(item) && (
               <Image
                 src={getBanner(item)!}
@@ -281,7 +286,6 @@ const initialCursor = formattedData.next;
 
         newItems.forEach((item) => {
           const itemElement = document.createElement("div");
-
           itemElement.className =
             "flex flex-col gap-2 rounded-lg border-2 border-zinc-200 bg-zinc-100 p-4 dark:border-zinc-800 dark:bg-zinc-900";
 
