@@ -80,7 +80,7 @@ const initialCursor = formattedData.next;
                 src={getBanner(item)!}
                 alt={item.name}
                 width={200}
-                height={65}
+                height={75}
                 loading="lazy"
                 class="w-full rounded-lg"
               />
@@ -90,10 +90,10 @@ const initialCursor = formattedData.next;
                 <Image
                   src={getIcon(item)!}
                   alt={item.name}
-                  width={64}
-                  height={64}
+                  width={40}
+                  height={40}
                   loading="lazy"
-                  class="h-16 w-16 rounded-lg"
+                  class="h-10 w-10 rounded-lg"
                 />
               )}
               <div class="flex flex-col gap-2">
@@ -320,7 +320,7 @@ const initialCursor = formattedData.next;
                 height="${item.iconAttributes!.height}"
                 loading="${item.iconAttributes!.loading}"
                 decoding="${item.iconAttributes!.decoding}"
-                class="h-16 w-16 rounded-lg"
+                class="h-10 w-10 rounded-lg"
                 onerror="this.src='/fallback-image.jpg'"
               />`
             : "";
