@@ -47,7 +47,7 @@ const initialCursor = formattedData.next;
 
 <Layout>
   <infinite-actions-list data-job={job} data-initial-cursor={initialCursor}>
-    <div class="flex flex-col gap-4">
+    <div id="container" class="flex w-full flex-col gap-4">
       {
         initialItems.map((item) => (
           <div
@@ -74,7 +74,7 @@ const initialCursor = formattedData.next;
           </div>
         ))
       }
-      <div class="loading hidden py-4 text-center">
+      <div id="loading" class="hidden py-4 text-center">
         <div
           class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-zinc-200 border-t-cyan-600"
         >
@@ -83,8 +83,8 @@ const initialCursor = formattedData.next;
           Loading more actions...
         </p>
       </div>
-      <div class="error hidden"></div>
-      <div class="loader"></div>
+      <div id="error" class="hidden"></div>
+      <div id="loader"></div>
     </div>
   </infinite-actions-list>
 
@@ -120,7 +120,7 @@ const initialCursor = formattedData.next;
       }
 
       connectedCallback(): void {
-        const loader = this.querySelector(".loader");
+        const loader = this.querySelector("#loader");
         if (loader) {
           this.loaderObserver.observe(loader);
         }
@@ -133,7 +133,7 @@ const initialCursor = formattedData.next;
       private async fetchData(): Promise<void> {
         if (this.loading) return;
 
-        const loadingElement = this.querySelector(".loading");
+        const loadingElement = this.querySelector("#loading");
         if (!loadingElement) return;
 
         this.loading = true;
@@ -156,7 +156,7 @@ const initialCursor = formattedData.next;
 
           this.renderItems(formattedData.results);
         } catch (err) {
-          const errorElement = this.querySelector(".error");
+          const errorElement = this.querySelector("#error");
           if (errorElement) {
             this.error = "An error occurred while fetching data";
             errorElement.textContent = this.error;
@@ -170,7 +170,7 @@ const initialCursor = formattedData.next;
       }
 
       private renderItems(newItems: Action[]): void {
-        const container = this.querySelector(".flex-col");
+        const container = this.querySelector("#container");
         if (!container) return;
 
         newItems.forEach((item) => {

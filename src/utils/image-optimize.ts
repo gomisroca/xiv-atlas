@@ -5,15 +5,15 @@ async function optimizeImage(imageUrl: string, type: string = "icon") {
   try {
     const remoteSrc = {
       src: imageUrl,
-      width: type === "icon" ? 40 : 200,
-      height: type === "icon" ? 40 : 75,
+      width: type === "icon" ? 40 : 375,
+      height: type === "icon" ? 40 : 120,
       format: "webp" as const,
     } as ImageMetadata;
 
     const optimized = await getImage({
       src: remoteSrc,
-      width: type === "icon" ? 40 : 200,
-      height: type === "icon" ? 40 : 75,
+      width: type === "icon" ? 40 : 375,
+      height: type === "icon" ? 40 : 120,
       format: "webp",
     });
 
